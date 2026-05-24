@@ -4,6 +4,9 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 <title>Notáveis – Museu Bajubá</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;0,700;1,400;1,500&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
 <style>
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
@@ -41,6 +44,20 @@ html, body {
   pointer-events: none;
   -webkit-user-drag: none;
   border-radius: 4px;
+}
+
+/* ── Placeholder enquanto não há imagem real ── */
+#collage-img.is-placeholder {
+  width: min(calc(100vw - 16px), 900px);
+  height: auto;
+  aspect-ratio: 4 / 5;
+  background:
+    repeating-linear-gradient(45deg,
+      rgba(255,255,255,0.04) 0 12px,
+      rgba(255,255,255,0.02) 12px 24px),
+    #1a1422;
+  display: grid;
+  place-items: center;
 }
 
 /* ── Hotspots: quadradinho no canto inferior direito de cada célula ── */
@@ -115,14 +132,14 @@ html, body {
 #panel {
   position: fixed;
   top: 0; right: 0;
-  width: clamp(280px, 85vw, 390px);
+  width: clamp(300px, 92vw, 440px);
   height: 100%;
   background: #0d0916;
   border-left: 1px solid rgba(218, 30, 214, 0.22);
   box-shadow: -12px 0 48px rgba(0, 0, 0, 0.7);
   z-index: 100;
   transform: translateX(100%);
-  transition: transform 0.38s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+  transition: transform 0.42s cubic-bezier(0.25, 0.46, 0.45, 0.94);
   display: flex;
   flex-direction: column;
   overflow-y: auto;
@@ -131,73 +148,352 @@ html, body {
   scrollbar-color: rgba(218,30,214,0.3) transparent;
 }
 #panel.on { transform: translateX(0); }
+#panel::-webkit-scrollbar { width: 6px; }
+#panel::-webkit-scrollbar-thumb {
+  background: rgba(218,30,214,0.35); border-radius: 3px;
+}
 
-#panel::before {
-  content: '';
-  display: block;
+.panel-progress {
   height: 3px;
   background: linear-gradient(90deg, #da1ed6, #7c2ff7, #da1ed6);
   flex-shrink: 0;
 }
 
-#panel-top {
-  padding: 16px 20px 0;
-  display: flex;
-  align-items: flex-start;
-  justify-content: space-between;
+/* ── Sticky header ── */
+#panel-head {
+  position: sticky;
+  top: 0;
+  z-index: 6;
+  display: grid;
+  grid-template-columns: auto 1fr auto;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 14px;
+  background: rgba(13, 9, 22, 0.82);
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+  border-bottom: 1px solid rgba(255,255,255,0.04);
 }
-
-#panel-num {
-  font-size: 92px;
-  font-weight: 900;
-  line-height: 0.85;
-  letter-spacing: -6px;
-  color: rgba(218, 30, 214, 0.1);
-  flex: 1;
-  padding-top: 2px;
-}
-
-#btn-close {
-  width: 36px;
-  height: 36px;
+.phb {
+  width: 34px; height: 34px;
   border-radius: 50%;
-  border: 1px solid rgba(255, 255, 255, 0.12);
+  border: 1px solid rgba(255, 255, 255, 0.1);
   background: rgba(255, 255, 255, 0.04);
-  color: rgba(255, 255, 255, 0.55);
-  font-size: 22px;
-  line-height: 1;
+  color: rgba(255, 255, 255, 0.7);
+  font-size: 22px; line-height: 1;
   cursor: pointer;
+  display: flex; align-items: center; justify-content: center;
+  font-family: inherit;
+  transition: background 0.15s, color 0.15s, border-color 0.15s;
+}
+.phb:hover {
+  background: rgba(218, 30, 214, 0.2);
+  border-color: rgba(218, 30, 214, 0.4);
+  color: #fff;
+}
+.panel-head-meta {
+  display: flex;
+  align-items: baseline;
+  gap: 6px;
+  font-size: 11.5px;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  color: rgba(255,255,255,0.7);
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+#panel-head-num { color: rgba(218, 30, 214, 0.95); font-weight: 700; }
+.panel-head-dot { color: rgba(255,255,255,0.3); }
+#panel-head-name {
+  font-family: 'Inter', -apple-system, sans-serif;
+  letter-spacing: 0.5px;
+  text-transform: none;
+  font-size: 12.5px;
+  font-weight: 600;
+  color: rgba(255,255,255,0.85);
+  overflow: hidden; text-overflow: ellipsis;
+}
+.panel-head-nav {
+  display: flex; gap: 6px;
+}
+.panel-head-nav .phb { font-size: 24px; padding-bottom: 2px; }
+
+/* ── Body ── */
+#panel-body {
+  padding: 18px 22px 60px;
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+}
+
+/* ── Portrait crop ── */
+#panel-portrait {
+  width: 100%;
+  background-color: #1a0e22;
+  background-image: url("collage.webp");
+  background-repeat: no-repeat;
+  border-radius: 6px;
+  box-shadow:
+    0 1px 0 rgba(255,255,255,0.06) inset,
+    0 10px 30px rgba(0,0,0,0.55),
+    0 0 0 1px rgba(218,30,214,0.18);
+  filter: contrast(1.02) saturate(1.05);
+  position: relative;
+  overflow: hidden;
+}
+#panel-portrait::after {
+  content: '';
+  position: absolute; inset: 0;
+  background: linear-gradient(180deg,
+    transparent 0%, transparent 65%,
+    rgba(13,9,22,0.4) 100%);
+  pointer-events: none;
+}
+
+/* ── ID line ── */
+.panel-id {
+  display: flex;
+  align-items: baseline;
+  gap: 4px;
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+  font-size: 12px;
+  letter-spacing: 2px;
+  color: rgba(218, 30, 214, 0.9);
+  margin-top: 4px;
+  margin-bottom: -8px;
+}
+.panel-id-total { color: rgba(255,255,255,0.3); font-weight: 400; }
+#panel-num { font-weight: 700; }
+
+/* ── Name (editorial serif) ── */
+#panel-name {
+  font-family: 'Cormorant Garamond', Georgia, serif;
+  font-weight: 500;
+  font-size: clamp(34px, 6.5vw, 46px);
+  line-height: 1.02;
+  letter-spacing: -0.5px;
+  color: #fff;
+  margin: 0;
+  text-wrap: balance;
+}
+
+/* ── Pullquote ── */
+#panel-quote {
+  position: relative;
+  margin: 4px 0 0;
+  padding: 14px 6px 14px 22px;
+  border-left: 2px solid rgba(218, 30, 214, 0.6);
+  font-family: 'Cormorant Garamond', Georgia, serif;
+  font-style: italic;
+  font-size: 17.5px;
+  line-height: 1.42;
+  color: rgba(255, 255, 255, 0.78);
+}
+.panel-quote-mark {
+  position: absolute;
+  left: 14px; top: -2px;
+  font-size: 38px;
+  font-family: 'Cormorant Garamond', Georgia, serif;
+  color: rgba(218, 30, 214, 0.5);
+  line-height: 1;
+}
+#panel-quote-text { display: inline; }
+
+/* ── Body description ── */
+#panel-desc {
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Arial, sans-serif;
+  font-size: 14.5px;
+  line-height: 1.72;
+  color: rgba(255, 255, 255, 0.72);
+  text-wrap: pretty;
+}
+
+/* ── Audio narrator ── */
+.panel-media {
+  display: flex;
+  gap: 8px;
+  margin-top: 4px;
+}
+.panel-mediabtn {
+  flex: 1;
   display: flex;
   align-items: center;
+  gap: 10px;
+  padding: 12px 14px;
+  border-radius: 8px;
+  border: 1px solid rgba(218, 30, 214, 0.3);
+  background: rgba(218, 30, 214, 0.08);
+  color: #fff;
+  font-family: inherit;
+  font-size: 13px;
+  font-weight: 600;
+  letter-spacing: 0.3px;
+  cursor: pointer;
+  transition: background 0.18s, border-color 0.18s, transform 0.1s;
+}
+.panel-mediabtn:hover {
+  background: rgba(218, 30, 214, 0.2);
+  border-color: rgba(218, 30, 214, 0.5);
+}
+.panel-mediabtn:active { transform: scale(0.98); }
+.panel-mediabtn .ic-play,
+.panel-mediabtn .ic-stop {
+  width: 22px; height: 22px;
+  border-radius: 50%;
+  background: rgba(218, 30, 214, 0.9);
+  color: #fff;
+  display: inline-flex;
+  align-items: center;
   justify-content: center;
+  font-size: 10px;
   flex-shrink: 0;
+}
+.panel-mediabtn .ic-stop,
+.panel-mediabtn .lbl-stop { display: none; }
+.panel-mediabtn.is-playing .ic-play,
+.panel-mediabtn.is-playing .lbl-play { display: none; }
+.panel-mediabtn.is-playing .ic-stop,
+.panel-mediabtn.is-playing .lbl-stop { display: inline-flex; }
+.panel-mediabtn.is-playing { animation: media-pulse 1.6s ease-in-out infinite; }
+@keyframes media-pulse {
+  0%, 100% { box-shadow: 0 0 0 0 rgba(218,30,214,0); }
+  50%      { box-shadow: 0 0 0 5px rgba(218,30,214,0.18); }
+}
+
+/* ── Secondary image placeholder ── */
+.panel-aux {
+  width: 100%;
+  aspect-ratio: 16 / 10;
+  border-radius: 6px;
+  background:
+    repeating-linear-gradient(135deg,
+      rgba(255,255,255,0.025) 0 10px,
+      rgba(255,255,255,0.012) 10px 20px),
+    #14091d;
+  border: 1px dashed rgba(255,255,255,0.1);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  color: rgba(255,255,255,0.4);
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+  font-size: 11px;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  padding: 12px;
+}
+.panel-aux-hint {
+  font-size: 10px;
+  letter-spacing: 0;
+  color: rgba(255,255,255,0.3);
+  text-transform: none;
+}
+
+/* ── External links ── */
+.panel-links {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  margin-top: 4px;
+}
+.panel-link {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 12px 14px;
+  border-radius: 8px;
+  background: rgba(255,255,255,0.03);
+  border: 1px solid rgba(255,255,255,0.06);
+  color: rgba(255,255,255,0.85);
+  text-decoration: none;
+  font-size: 13px;
+  font-weight: 500;
+  transition: background 0.18s, border-color 0.18s;
+}
+.panel-link:hover {
+  background: rgba(218,30,214,0.1);
+  border-color: rgba(218,30,214,0.3);
+  color: #fff;
+}
+.panel-link-dot {
+  width: 8px; height: 8px;
+  border-radius: 50%;
+  background: rgba(218, 30, 214, 0.9);
+  flex-shrink: 0;
+}
+.panel-link[data-kind="spotify"] .panel-link-dot { background: #1db954; }
+.panel-link[data-kind="wiki"] .panel-link-dot { background: #fff; }
+.panel-link-arrow {
+  margin-left: auto;
+  font-size: 14px;
+  color: rgba(255,255,255,0.4);
+}
+.panel-link:hover .panel-link-arrow { color: rgba(255,255,255,0.85); }
+
+/* ── Related chips ── */
+.panel-related {
   margin-top: 6px;
-  transition: background 0.2s, color 0.2s;
+  padding-top: 18px;
+  border-top: 1px solid rgba(255,255,255,0.06);
 }
-#btn-close:hover { background: rgba(218, 30, 214, 0.25); color: #fff; }
-
-#panel-body { padding: 4px 26px 52px; }
-
-#panel-name {
-  font-size: 26px;
-  font-weight: 800;
-  color: #da1ed6;
-  line-height: 1.2;
-  margin-bottom: 14px;
+.panel-related-label {
+  font-size: 10.5px;
+  font-weight: 600;
+  letter-spacing: 1.5px;
+  text-transform: uppercase;
+  color: rgba(255,255,255,0.42);
+  margin-bottom: 10px;
+}
+.panel-related-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+.panel-related-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 7px 11px 7px 8px;
+  background: rgba(255,255,255,0.04);
+  border: 1px solid rgba(255,255,255,0.06);
+  border-radius: 18px;
+  color: rgba(255,255,255,0.82);
+  font-size: 12px;
+  cursor: pointer;
+  font-family: inherit;
+  transition: background 0.15s, border-color 0.15s, color 0.15s;
+}
+.panel-related-chip:hover {
+  background: rgba(218,30,214,0.18);
+  border-color: rgba(218,30,214,0.4);
+  color: #fff;
+}
+.panel-related-chip-num {
+  font-family: ui-monospace, monospace;
+  font-size: 10px;
+  color: rgba(218, 30, 214, 0.85);
+  font-weight: 700;
 }
 
-#panel-bar {
-  width: 38px;
-  height: 3px;
-  background: linear-gradient(90deg, #da1ed6, #7c2ff7);
-  border-radius: 2px;
-  margin-bottom: 18px;
+/* ── Cascade fade-in animation ── */
+.panel-fade { opacity: 0; transform: translateY(8px); }
+#panel.on .panel-fade {
+  animation: panel-fade-in 0.5s cubic-bezier(0.2, 0.7, 0.2, 1) forwards;
 }
-
-#panel-desc {
-  font-size: 15px;
-  line-height: 1.78;
-  color: rgba(255, 255, 255, 0.7);
+#panel.on #panel-portrait      { animation-delay: 0.08s; }
+#panel.on .panel-id            { animation-delay: 0.14s; }
+#panel.on #panel-name          { animation-delay: 0.18s; }
+#panel.on #panel-quote         { animation-delay: 0.24s; }
+#panel.on #panel-desc          { animation-delay: 0.30s; }
+#panel.on .panel-media         { animation-delay: 0.36s; }
+#panel.on .panel-aux           { animation-delay: 0.40s; }
+#panel.on .panel-links         { animation-delay: 0.44s; }
+#panel.on .panel-related       { animation-delay: 0.48s; }
+@keyframes panel-fade-in {
+  to { opacity: 1; transform: translateY(0); }
 }
 
 /* ── Hint ── */
@@ -218,6 +514,624 @@ html, body {
   white-space: nowrap;
   transition: opacity 0.7s ease;
 }
+
+/* ── Aviso de imagem ausente ── */
+#missing-note {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  text-align: center;
+  color: rgba(255,255,255,0.4);
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+  font-size: 12px;
+  letter-spacing: 0.5px;
+  padding: 24px;
+  pointer-events: none;
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   TWEAKS – Atmosfera / Descoberta / Revelação
+   ═══════════════════════════════════════════════════════════════ */
+
+/* ── Atmosfera: MUSEU (sóbrio, papel, pontinhos discretos) ── */
+body[data-atmosfera="museu"] { background: #e9e3d6; }
+body[data-atmosfera="museu"] #collage-img { box-shadow: 0 14px 60px rgba(0,0,0,0.18); }
+body[data-atmosfera="museu"] .hs {
+  width: 11px; height: 11px;
+  border-radius: 50%;
+  background: rgba(255,255,255,0.92);
+  border: 1px solid rgba(0,0,0,0.45);
+  color: transparent; font-size: 0;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.4);
+  animation: none;
+}
+body[data-atmosfera="museu"] .hs:hover {
+  background: #fff; color: transparent;
+  border-color: #000;
+  transform: translate(-100%, -100%) scale(1.6);
+  box-shadow: 0 2px 10px rgba(0,0,0,0.55);
+}
+body[data-atmosfera="museu"] .hs.is-open {
+  background: #1a1a1a; border-color: #1a1a1a;
+  transform: translate(-100%, -100%) scale(1.6);
+  box-shadow: 0 0 0 3px rgba(0,0,0,0.15);
+}
+body[data-atmosfera="museu"] #panel {
+  background: #f6f1e3;
+  border-left: 1px solid rgba(0,0,0,0.12);
+  color: #1a1a1a;
+}
+body[data-atmosfera="museu"] .panel-progress { background: #1a1a1a; height: 2px; }
+body[data-atmosfera="museu"] #panel-head {
+  background: rgba(246, 241, 227, 0.88);
+  border-bottom: 1px solid rgba(0,0,0,0.08);
+}
+body[data-atmosfera="museu"] .phb {
+  background: transparent;
+  border-color: rgba(0,0,0,0.18);
+  color: #1a1a1a;
+}
+body[data-atmosfera="museu"] .phb:hover {
+  background: #1a1a1a; color: #f6f1e3; border-color: #1a1a1a;
+}
+body[data-atmosfera="museu"] #panel-head-num { color: #1a1a1a; }
+body[data-atmosfera="museu"] #panel-head-name { color: #1a1a1a; }
+body[data-atmosfera="museu"] .panel-head-dot { color: rgba(0,0,0,0.3); }
+body[data-atmosfera="museu"] #panel-portrait {
+  box-shadow: 0 8px 24px rgba(0,0,0,0.18), 0 0 0 1px rgba(0,0,0,0.08);
+  filter: contrast(0.95) saturate(0.85);
+}
+body[data-atmosfera="museu"] .panel-id { color: rgba(0,0,0,0.55); }
+body[data-atmosfera="museu"] .panel-id-total { color: rgba(0,0,0,0.25); }
+body[data-atmosfera="museu"] #panel-num {
+  color: rgba(0,0,0,0.7);
+  font-family: ui-monospace, monospace;
+  font-style: normal;
+}
+body[data-atmosfera="museu"] #panel-name {
+  color: #1a1a1a;
+  font-family: 'Cormorant Garamond', Georgia, serif;
+  font-style: italic;
+  font-weight: 500;
+}
+body[data-atmosfera="museu"] #panel-quote {
+  border-left-color: rgba(0,0,0,0.4);
+  color: rgba(0,0,0,0.72);
+}
+body[data-atmosfera="museu"] .panel-quote-mark { color: rgba(0,0,0,0.35); }
+body[data-atmosfera="museu"] #panel-desc {
+  color: rgba(0,0,0,0.78);
+  font-family: 'Cormorant Garamond', Georgia, serif;
+  font-size: 16.5px; line-height: 1.7;
+}
+body[data-atmosfera="museu"] .panel-mediabtn {
+  background: transparent;
+  border-color: rgba(0,0,0,0.25);
+  color: #1a1a1a;
+}
+body[data-atmosfera="museu"] .panel-mediabtn:hover {
+  background: #1a1a1a; color: #f6f1e3;
+  border-color: #1a1a1a;
+}
+body[data-atmosfera="museu"] .panel-mediabtn .ic-play,
+body[data-atmosfera="museu"] .panel-mediabtn .ic-stop {
+  background: #1a1a1a; color: #f6f1e3;
+}
+body[data-atmosfera="museu"] .panel-mediabtn:hover .ic-play,
+body[data-atmosfera="museu"] .panel-mediabtn:hover .ic-stop {
+  background: #f6f1e3; color: #1a1a1a;
+}
+body[data-atmosfera="museu"] .panel-aux {
+  background: repeating-linear-gradient(135deg,
+    rgba(0,0,0,0.04) 0 10px,
+    rgba(0,0,0,0.02) 10px 20px), #e9e3d6;
+  border-color: rgba(0,0,0,0.15);
+  color: rgba(0,0,0,0.45);
+}
+body[data-atmosfera="museu"] .panel-aux-hint { color: rgba(0,0,0,0.35); }
+body[data-atmosfera="museu"] .panel-link {
+  background: transparent;
+  border-color: rgba(0,0,0,0.15);
+  color: #1a1a1a;
+}
+body[data-atmosfera="museu"] .panel-link:hover {
+  background: rgba(0,0,0,0.05);
+  border-color: rgba(0,0,0,0.4);
+}
+body[data-atmosfera="museu"] .panel-link-dot { background: #1a1a1a; }
+body[data-atmosfera="museu"] .panel-link[data-kind="spotify"] .panel-link-dot { background: #1db954; }
+body[data-atmosfera="museu"] .panel-link-arrow { color: rgba(0,0,0,0.4); }
+body[data-atmosfera="museu"] .panel-link:hover .panel-link-arrow { color: #1a1a1a; }
+body[data-atmosfera="museu"] .panel-related { border-top-color: rgba(0,0,0,0.1); }
+body[data-atmosfera="museu"] .panel-related-label { color: rgba(0,0,0,0.5); }
+body[data-atmosfera="museu"] .panel-related-chip {
+  background: transparent;
+  border-color: rgba(0,0,0,0.18);
+  color: #1a1a1a;
+}
+body[data-atmosfera="museu"] .panel-related-chip:hover {
+  background: #1a1a1a; color: #f6f1e3;
+  border-color: #1a1a1a;
+}
+body[data-atmosfera="museu"] .panel-related-chip-num { color: rgba(0,0,0,0.55); }
+body[data-atmosfera="museu"] #btn-close {
+  color: #1a1a1a; border-color: rgba(0,0,0,0.2);
+  background: transparent;
+}
+body[data-atmosfera="museu"] #btn-close:hover {
+  background: #1a1a1a; color: #f6f1e3;
+}
+body[data-atmosfera="museu"] #hint {
+  background: rgba(255,255,255,0.85); color: #1a1a1a;
+  border: 1px solid rgba(0,0,0,0.1);
+}
+
+/* ── Atmosfera: FESTA (orbe neon ciano + magenta) ── */
+body[data-atmosfera="festa"] { background: #06000d; }
+body[data-atmosfera="festa"] #stage::after {
+  content: ''; position: fixed; inset: 0; pointer-events: none;
+  background: repeating-linear-gradient(0deg,
+    transparent 0 2px,
+    rgba(0,0,0,0.35) 2px 3px);
+  z-index: 40;
+  mix-blend-mode: multiply;
+}
+body[data-atmosfera="festa"] #collage-img {
+  box-shadow:
+    0 0 0 1px rgba(0,255,224,0.4),
+    0 0 30px rgba(255,0,255,0.25),
+    0 0 80px rgba(0,255,224,0.18);
+  filter: saturate(1.15) contrast(1.05);
+}
+body[data-atmosfera="festa"] .hs {
+  width: 26px; height: 26px;
+  background: #00ffe0;
+  border: 1.5px solid #fff;
+  color: #06000d; font-size: 9px;
+  border-radius: 3px;
+  animation: hs-pulse-festa 1.4s ease-in-out infinite;
+}
+@keyframes hs-pulse-festa {
+  0%, 100% {
+    box-shadow: 0 0 0 0 rgba(0,255,224,0.6), 0 0 14px rgba(0,255,224,0.8);
+    background: #00ffe0;
+  }
+  50% {
+    box-shadow: 0 0 0 7px rgba(255,0,255,0), 0 0 28px rgba(255,0,255,0.85), 0 0 60px rgba(0,255,224,0.4);
+    background: #ff3df0;
+  }
+}
+body[data-atmosfera="festa"] .hs:hover {
+  animation: none;
+  background: #fff; color: #06000d;
+  transform: translate(-100%, -100%) scale(1.35);
+  box-shadow: 0 0 0 6px rgba(0,255,224,0.35), 0 0 30px #00ffe0, 0 0 50px #ff3df0;
+}
+body[data-atmosfera="festa"] .hs.is-open {
+  animation: none;
+  background: #fff; color: #ff3df0; border-color: #00ffe0;
+  transform: translate(-100%, -100%) scale(1.25);
+  box-shadow: 0 0 0 4px rgba(0,255,224,0.6), 0 0 24px #00ffe0;
+}
+body[data-atmosfera="festa"] #panel {
+  background: #06000d;
+  border-left: 1px solid #00ffe0;
+  box-shadow: -2px 0 30px rgba(0,255,224,0.4), -16px 0 60px rgba(255,0,255,0.25);
+}
+body[data-atmosfera="festa"] .panel-progress {
+  background: linear-gradient(90deg, #ff3df0, #00ffe0, #ffea00, #ff3df0);
+  height: 4px;
+}
+body[data-atmosfera="festa"] #panel-head {
+  background: rgba(6, 0, 13, 0.82);
+  border-bottom: 1px solid rgba(0,255,224,0.2);
+}
+body[data-atmosfera="festa"] .phb {
+  border-color: rgba(0,255,224,0.4);
+  color: #00ffe0;
+}
+body[data-atmosfera="festa"] .phb:hover {
+  background: #00ffe0; color: #06000d; border-color: #00ffe0;
+}
+body[data-atmosfera="festa"] #panel-head-num { color: #ff3df0; }
+body[data-atmosfera="festa"] #panel-head-name { color: #00ffe0; }
+body[data-atmosfera="festa"] #panel-portrait {
+  box-shadow: 0 0 0 1px rgba(0,255,224,0.5),
+              0 0 24px rgba(0,255,224,0.3),
+              0 0 40px rgba(255,0,240,0.2);
+  filter: contrast(1.1) saturate(1.25);
+}
+body[data-atmosfera="festa"] .panel-id { color: #ff3df0; }
+body[data-atmosfera="festa"] .panel-id-total { color: rgba(0,255,224,0.4); }
+body[data-atmosfera="festa"] #panel-num {
+  color: #ff3df0;
+  font-family: ui-monospace, monospace;
+}
+body[data-atmosfera="festa"] #panel-name {
+  color: #00ffe0;
+  text-shadow: 0 0 14px rgba(0,255,224,0.65);
+  font-family: ui-monospace, monospace;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  font-size: clamp(28px, 5.5vw, 38px);
+}
+body[data-atmosfera="festa"] #panel-quote {
+  border-left-color: #00ffe0;
+  color: rgba(220, 255, 250, 0.78);
+  font-family: ui-monospace, monospace;
+  font-style: normal;
+  font-size: 14px;
+}
+body[data-atmosfera="festa"] .panel-quote-mark {
+  color: #00ffe0;
+  text-shadow: 0 0 10px rgba(0,255,224,0.5);
+}
+body[data-atmosfera="festa"] #panel-desc {
+  color: rgba(255,255,255,0.82);
+}
+body[data-atmosfera="festa"] .panel-mediabtn {
+  background: rgba(0,255,224,0.05);
+  border-color: rgba(0,255,224,0.5);
+  color: #00ffe0;
+  box-shadow: 0 0 12px rgba(0,255,224,0.15);
+}
+body[data-atmosfera="festa"] .panel-mediabtn:hover {
+  background: rgba(0,255,224,0.18);
+  border-color: #00ffe0;
+  box-shadow: 0 0 20px rgba(0,255,224,0.5);
+}
+body[data-atmosfera="festa"] .panel-mediabtn .ic-play,
+body[data-atmosfera="festa"] .panel-mediabtn .ic-stop {
+  background: #00ffe0; color: #06000d;
+}
+body[data-atmosfera="festa"] .panel-aux {
+  background: repeating-linear-gradient(135deg,
+    rgba(0,255,224,0.04) 0 10px,
+    rgba(255,0,240,0.03) 10px 20px), #0a0017;
+  border-color: rgba(0,255,224,0.3);
+  color: rgba(0,255,224,0.6);
+}
+body[data-atmosfera="festa"] .panel-aux-hint { color: rgba(255,0,240,0.55); }
+body[data-atmosfera="festa"] .panel-link {
+  background: rgba(0,255,224,0.04);
+  border-color: rgba(0,255,224,0.25);
+  color: #00ffe0;
+}
+body[data-atmosfera="festa"] .panel-link:hover {
+  background: rgba(255,61,240,0.12);
+  border-color: #ff3df0;
+  color: #fff;
+  box-shadow: 0 0 16px rgba(255,61,240,0.35);
+}
+body[data-atmosfera="festa"] .panel-link-arrow { color: rgba(0,255,224,0.6); }
+body[data-atmosfera="festa"] .panel-related { border-top-color: rgba(0,255,224,0.2); }
+body[data-atmosfera="festa"] .panel-related-label { color: rgba(0,255,224,0.55); }
+body[data-atmosfera="festa"] .panel-related-chip {
+  background: rgba(0,255,224,0.05);
+  border-color: rgba(0,255,224,0.3);
+  color: #00ffe0;
+}
+body[data-atmosfera="festa"] .panel-related-chip:hover {
+  background: rgba(255,61,240,0.18);
+  border-color: #ff3df0;
+  color: #fff;
+}
+body[data-atmosfera="festa"] .panel-related-chip-num { color: #ff3df0; }
+body[data-atmosfera="festa"] #btn-close {
+  border-color: rgba(0,255,224,0.4);
+  color: #00ffe0;
+}
+body[data-atmosfera="festa"] #btn-close:hover {
+  background: #00ffe0; color: #06000d;
+}
+
+/* ── Descoberta: SUSSURRO (quase invisível até hover) ── */
+body[data-descoberta="sussurro"] .hs {
+  opacity: 0.22;
+  animation: none;
+  box-shadow: none;
+  transition: opacity 0.25s, transform 0.15s, box-shadow 0.15s;
+}
+body[data-descoberta="sussurro"] .hs:hover,
+body[data-descoberta="sussurro"] .hs.is-open {
+  opacity: 1;
+}
+
+/* ── Descoberta: PRÓXIMO (só aparece perto do cursor) ── */
+body[data-descoberta="proximo"] .hs {
+  opacity: 0;
+  animation: none;
+  transition: opacity 0.35s ease, transform 0.15s, box-shadow 0.15s;
+  pointer-events: auto; /* ainda clicável mesmo invisível */
+}
+body[data-descoberta="proximo"] .hs.is-near { opacity: 1; }
+body[data-descoberta="proximo"] .hs.is-open { opacity: 1; }
+
+/* ── Revelação: LEGENDA (cartão flutuante) ── */
+#caption {
+  position: absolute;
+  z-index: 80;
+  min-width: 200px; max-width: 280px;
+  background: rgba(13, 9, 22, 0.96);
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(218, 30, 214, 0.4);
+  box-shadow: 0 10px 30px rgba(0,0,0,0.6);
+  border-radius: 6px;
+  padding: 14px 16px 16px;
+  color: #fff;
+  opacity: 0; pointer-events: none;
+  transform: translateY(6px) scale(0.97);
+  transition: opacity 0.2s, transform 0.2s;
+}
+#caption.on { opacity: 1; pointer-events: auto; transform: translateY(0) scale(1); }
+#caption-head { display: flex; align-items: baseline; gap: 8px; margin-bottom: 8px; }
+#caption-num {
+  font-family: ui-monospace, monospace;
+  font-size: 11px; font-weight: 700;
+  color: rgba(218,30,214,0.9); letter-spacing: 0.5px;
+}
+#caption-name {
+  font-size: 16px; font-weight: 800; color: #fff;
+  line-height: 1.15;
+}
+#caption-desc {
+  font-size: 12.5px; line-height: 1.55;
+  color: rgba(255,255,255,0.72);
+}
+body[data-atmosfera="museu"] #caption {
+  background: rgba(246, 241, 227, 0.97);
+  border-color: rgba(0,0,0,0.18);
+  color: #1a1a1a;
+}
+body[data-atmosfera="museu"] #caption-num { color: rgba(0,0,0,0.5); }
+body[data-atmosfera="museu"] #caption-name {
+  color: #1a1a1a; font-family: 'Times New Roman', Georgia, serif;
+  font-weight: 400; font-style: italic;
+}
+body[data-atmosfera="museu"] #caption-desc {
+  color: rgba(0,0,0,0.75);
+  font-family: 'Times New Roman', Georgia, serif;
+  font-size: 13.5px;
+}
+body[data-atmosfera="festa"] #caption {
+  background: rgba(6,0,13,0.94);
+  border-color: #00ffe0;
+  box-shadow: 0 0 0 1px rgba(0,255,224,0.3), 0 8px 30px rgba(255,0,255,0.35);
+}
+body[data-atmosfera="festa"] #caption-num {
+  color: #ff3df0; font-family: ui-monospace, monospace;
+}
+body[data-atmosfera="festa"] #caption-name {
+  color: #00ffe0;
+  font-family: ui-monospace, monospace;
+  text-transform: uppercase; letter-spacing: 1px;
+  text-shadow: 0 0 10px rgba(0,255,224,0.7);
+}
+
+/* ── Revelação: CINEMA (escurece tudo, texto grande centralizado) ── */
+#cinema {
+  position: fixed; inset: 0; z-index: 90;
+  background: rgba(0,0,0,0.88);
+  display: flex; flex-direction: column;
+  align-items: center; justify-content: flex-end;
+  padding: 0 8vw 8vh;
+  opacity: 0; pointer-events: none;
+  transition: opacity 0.4s ease;
+  text-align: center;
+}
+#cinema.on { opacity: 1; pointer-events: auto; }
+#cinema-num {
+  font-family: ui-monospace, monospace;
+  font-size: 13px; font-weight: 700;
+  color: rgba(218,30,214,0.8);
+  letter-spacing: 3px;
+  margin-bottom: 16px;
+}
+#cinema-name {
+  font-size: clamp(38px, 7vw, 86px);
+  font-weight: 900;
+  color: #fff;
+  line-height: 0.95;
+  letter-spacing: -2px;
+  margin-bottom: 28px;
+  max-width: 16ch;
+}
+#cinema-desc {
+  font-size: clamp(15px, 1.5vw, 18px);
+  line-height: 1.7;
+  color: rgba(255,255,255,0.7);
+  max-width: 56ch;
+}
+body[data-atmosfera="museu"] #cinema {
+  background: rgba(233, 227, 214, 0.94);
+}
+body[data-atmosfera="museu"] #cinema-num { color: rgba(0,0,0,0.6); }
+body[data-atmosfera="museu"] #cinema-name {
+  color: #1a1a1a;
+  font-family: 'Times New Roman', Georgia, serif;
+  font-weight: 400; font-style: italic;
+  letter-spacing: -1px;
+}
+body[data-atmosfera="museu"] #cinema-desc {
+  color: rgba(0,0,0,0.75);
+  font-family: 'Times New Roman', Georgia, serif;
+}
+body[data-atmosfera="festa"] #cinema {
+  background: rgba(6,0,13,0.92);
+}
+body[data-atmosfera="festa"] #cinema::before {
+  content: ''; position: absolute; inset: 0;
+  background: repeating-linear-gradient(0deg,
+    transparent 0 2px, rgba(0,0,0,0.35) 2px 3px);
+  pointer-events: none;
+}
+body[data-atmosfera="festa"] #cinema-num {
+  color: #ff3df0;
+}
+body[data-atmosfera="festa"] #cinema-name {
+  color: #00ffe0;
+  font-family: ui-monospace, monospace;
+  text-transform: uppercase; letter-spacing: 2px;
+  text-shadow: 0 0 24px rgba(0,255,224,0.6);
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   TWEAKS PANEL (controles)
+   ═══════════════════════════════════════════════════════════════ */
+#tweaks {
+  position: fixed;
+  top: 14px; left: 14px;
+  z-index: 200;
+  width: 264px;
+  background: rgba(20, 14, 28, 0.94);
+  backdrop-filter: blur(14px);
+  border: 1px solid rgba(255,255,255,0.1);
+  border-radius: 10px;
+  box-shadow: 0 12px 40px rgba(0,0,0,0.6);
+  color: #fff;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Arial, sans-serif;
+  font-size: 12px;
+  user-select: none;
+  display: none;
+  flex-direction: column;
+  overflow: hidden;
+}
+#tweaks.on { display: flex; }
+#tweaks-head {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 10px 12px 10px 14px;
+  border-bottom: 1px solid rgba(255,255,255,0.06);
+  cursor: move;
+}
+#tweaks-title {
+  font-size: 11px; font-weight: 700;
+  letter-spacing: 2px; text-transform: uppercase;
+  color: rgba(255,255,255,0.6);
+}
+#tweaks-close {
+  width: 22px; height: 22px;
+  border: none; background: transparent;
+  color: rgba(255,255,255,0.5);
+  font-size: 18px; line-height: 1; cursor: pointer;
+  border-radius: 4px;
+}
+#tweaks-close:hover { background: rgba(255,255,255,0.08); color: #fff; }
+#tweaks-body { padding: 14px; display: flex; flex-direction: column; gap: 16px; }
+.tw-group { display: flex; flex-direction: column; gap: 8px; }
+.tw-label {
+  font-size: 10.5px; font-weight: 700;
+  letter-spacing: 1.5px; text-transform: uppercase;
+  color: rgba(255,255,255,0.55);
+}
+.tw-seg {
+  display: grid; grid-template-columns: 1fr 1fr 1fr;
+  gap: 4px;
+  background: rgba(255,255,255,0.04);
+  border: 1px solid rgba(255,255,255,0.06);
+  border-radius: 7px;
+  padding: 3px;
+}
+.tw-seg button {
+  border: none; background: transparent;
+  color: rgba(255,255,255,0.65);
+  font-size: 11.5px; font-weight: 600;
+  padding: 7px 4px;
+  border-radius: 5px;
+  cursor: pointer;
+  transition: background 0.15s, color 0.15s;
+  font-family: inherit;
+}
+.tw-seg button:hover { color: #fff; }
+.tw-seg button.is-active {
+  background: #da1ed6;
+  color: #fff;
+  box-shadow: 0 2px 8px rgba(218,30,214,0.35);
+}
+.tw-hint {
+  font-size: 10.5px; color: rgba(255,255,255,0.4);
+  font-style: italic; line-height: 1.4;
+  min-height: 14px;
+}
+.tw-toggle, .tw-btn {
+  width: 100%;
+  padding: 9px 10px;
+  border-radius: 6px;
+  border: 1px solid rgba(255,255,255,0.08);
+  background: rgba(255,255,255,0.04);
+  color: rgba(255,255,255,0.85);
+  font-family: inherit;
+  font-size: 11.5px; font-weight: 600;
+  cursor: pointer;
+  text-align: left;
+  transition: background 0.15s, color 0.15s, border-color 0.15s;
+}
+.tw-toggle:hover, .tw-btn:hover { background: rgba(255,255,255,0.08); color: #fff; }
+.tw-toggle.is-on {
+  background: #00ff88; color: #001a0c;
+  border-color: #00ff88;
+  box-shadow: 0 2px 10px rgba(0,255,136,0.3);
+}
+.tw-toggle .dot {
+  display: inline-block; width: 8px; height: 8px;
+  border-radius: 50%; margin-right: 8px;
+  background: rgba(255,255,255,0.25);
+  vertical-align: 1px;
+}
+.tw-toggle.is-on .dot { background: #001a0c; box-shadow: 0 0 0 2px #00ff88; }
+.tw-cal-pane {
+  display: none; flex-direction: column; gap: 8px;
+  margin-top: 4px;
+  padding: 10px; border-radius: 6px;
+  background: rgba(0,255,136,0.06);
+  border: 1px solid rgba(0,255,136,0.18);
+}
+.tw-cal-pane.on { display: flex; }
+.tw-cal-target {
+  font-family: ui-monospace, monospace;
+  font-size: 11px; color: #00ff88;
+  letter-spacing: 0.5px;
+}
+.tw-cal-target small {
+  display: block; color: rgba(255,255,255,0.55);
+  font-size: 10px; margin-top: 3px;
+  letter-spacing: 0;
+}
+.tw-cal-hint {
+  font-size: 10.5px; color: rgba(255,255,255,0.45);
+  font-style: italic; line-height: 1.4;
+}
+#tw-toast {
+  position: fixed; left: 50%; bottom: 70px;
+  transform: translateX(-50%);
+  background: #00ff88; color: #001a0c;
+  padding: 9px 18px; border-radius: 24px;
+  font-size: 12px; font-weight: 700;
+  letter-spacing: 0.5px;
+  box-shadow: 0 8px 30px rgba(0,255,136,0.45);
+  opacity: 0; pointer-events: none;
+  transition: opacity 0.25s, transform 0.25s;
+  z-index: 300;
+}
+#tw-toast.on { opacity: 1; transform: translateX(-50%) translateY(0); }
+
+/* ── Hotspots em modo calibrar: visual neutro + seleção destacada ── */
+body[data-calibrar="on"] .hs {
+  cursor: grab;
+  animation: none !important;
+  opacity: 1 !important;
+  background: #00ff88 !important;
+  border: 1.5px solid #fff !important;
+  color: #001a0c !important;
+  box-shadow: 0 0 0 1px rgba(0,255,136,0.4), 0 2px 6px rgba(0,0,0,0.4) !important;
+}
+body[data-calibrar="on"] .hs:active { cursor: grabbing; }
+body[data-calibrar="on"] .hs.is-cal-selected {
+  background: #ffea00 !important;
+  color: #000 !important;
+  box-shadow: 0 0 0 3px rgba(255,234,0,0.45), 0 0 16px rgba(255,234,0,0.7) !important;
+  z-index: 25;
+}
 </style>
 </head>
 <body>
@@ -225,61 +1139,216 @@ html, body {
 <div id="stage">
   <div id="world">
     <img id="collage-img" src="collage.webp" alt="Notáveis Bajubá" draggable="false">
+    <div id="missing-note">[ colagem ausente — adicione collage.webp ao projeto ]</div>
   </div>
 </div>
 
 <div id="overlay"></div>
 
-<div id="panel">
-  <div id="panel-top">
-    <div id="panel-num">01</div>
-    <button id="btn-close" aria-label="Fechar">&#215;</button>
-  </div>
+<div id="panel" aria-hidden="true">
+  <div class="panel-progress"></div>
+
+  <header id="panel-head">
+    <button id="btn-close" class="phb" aria-label="Fechar">&#215;</button>
+    <div class="panel-head-meta">
+      <span id="panel-head-num">01</span>
+      <span class="panel-head-dot">·</span>
+      <span id="panel-head-name">Nome</span>
+    </div>
+    <div class="panel-head-nav">
+      <button id="btn-prev" class="phb" aria-label="Anterior">‹</button>
+      <button id="btn-next" class="phb" aria-label="Próximo">›</button>
+    </div>
+  </header>
+
   <div id="panel-body">
-    <div id="panel-name">Nome</div>
-    <div id="panel-bar"></div>
-    <div id="panel-desc"></div>
+    <div id="panel-portrait" class="panel-fade" aria-hidden="true"></div>
+
+    <div class="panel-id panel-fade">
+      <span id="panel-num">01</span>
+      <span class="panel-id-total">/21</span>
+    </div>
+    <h1 id="panel-name" class="panel-fade">Nome</h1>
+
+    <blockquote id="panel-quote" class="panel-fade">
+      <span class="panel-quote-mark">&ldquo;</span>
+      <span id="panel-quote-text">Citação em destaque ou frase marcante.</span>
+    </blockquote>
+
+    <div id="panel-desc" class="panel-fade"></div>
+
+    <div class="panel-media panel-fade">
+      <button id="btn-narrate" class="panel-mediabtn" type="button">
+        <span class="ic-play" aria-hidden="true">▶</span>
+        <span class="ic-stop" aria-hidden="true">■</span>
+        <span class="lbl-play">Ouvir biografia</span>
+        <span class="lbl-stop">Parar</span>
+      </button>
+    </div>
+
+    <div class="panel-aux panel-fade">
+      <div class="panel-aux-label">imagem secundária</div>
+      <div class="panel-aux-hint">capa de disco, foto de palco, cartaz, etc.</div>
+    </div>
+
+    <div class="panel-links panel-fade">
+      <a class="panel-link" href="#" data-kind="spotify" target="_blank" rel="noopener">
+        <span class="panel-link-dot"></span>
+        Ouvir no Spotify
+        <span class="panel-link-arrow">↗</span>
+      </a>
+      <a class="panel-link" href="#" data-kind="wiki" target="_blank" rel="noopener">
+        <span class="panel-link-dot"></span>
+        Saiba mais · Wikipédia
+        <span class="panel-link-arrow">↗</span>
+      </a>
+    </div>
+
+    <div class="panel-related panel-fade">
+      <div class="panel-related-label">Outros notáveis</div>
+      <div id="panel-related-chips" class="panel-related-chips"></div>
+    </div>
   </div>
 </div>
 
 <div id="hint">Toque em uma pessoa para saber mais</div>
 
+<!-- Cartão de legenda (modo "legenda") -->
+<div id="caption">
+  <div id="caption-head">
+    <span id="caption-num">01</span>
+    <span id="caption-name">Nome</span>
+  </div>
+  <div id="caption-desc"></div>
+</div>
+
+<!-- Overlay cinema (modo "cinema") -->
+<div id="cinema">
+  <div id="cinema-num">01</div>
+  <div id="cinema-name">Nome</div>
+  <div id="cinema-desc"></div>
+</div>
+
+<!-- Painel de Tweaks -->
+<div id="tweaks" role="dialog" aria-label="Tweaks">
+  <div id="tweaks-head">
+    <div id="tweaks-title">Tweaks</div>
+    <button id="tweaks-close" aria-label="Fechar">&#215;</button>
+  </div>
+  <div id="tweaks-body">
+    <div class="tw-group">
+      <div class="tw-label">Atmosfera</div>
+      <div class="tw-seg" data-key="atmosfera">
+        <button data-value="museu">Museu</button>
+        <button data-value="zine">Zine</button>
+        <button data-value="festa">Festa</button>
+      </div>
+      <div class="tw-hint" data-hint="atmosfera"></div>
+    </div>
+    <div class="tw-group">
+      <div class="tw-label">Descoberta</div>
+      <div class="tw-seg" data-key="descoberta">
+        <button data-value="sempre">Sempre</button>
+        <button data-value="sussurro">Sussurro</button>
+        <button data-value="proximo">Próximo</button>
+      </div>
+      <div class="tw-hint" data-hint="descoberta"></div>
+    </div>
+    <div class="tw-group">
+      <div class="tw-label">Revelação</div>
+      <div class="tw-seg" data-key="revelacao">
+        <button data-value="lateral">Lateral</button>
+        <button data-value="legenda">Legenda</button>
+        <button data-value="cinema">Cinema</button>
+      </div>
+      <div class="tw-hint" data-hint="revelacao" style="width: 231px"></div>
+    </div>
+    <div class="tw-group">
+      <div class="tw-label">Calibrar</div>
+      <button id="tw-calibrar" class="tw-toggle" type="button">
+        <span class="dot"></span><span class="tw-toggle-label">Modo de ajuste — desligado</span>
+      </button>
+      <div id="tw-cal-pane" class="tw-cal-pane">
+        <div id="tw-cal-target" class="tw-cal-target">
+          Arraste qualquer hotspot
+          <small>Setas: 1px · Shift+setas: 10px</small>
+        </div>
+        <button id="tw-copy" class="tw-btn" type="button">Copiar coordenadas</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div id="tw-toast"></div>
+
 <script>
 (function () {
 'use strict';
 
-// x, y = canto inferior direito de cada célula (% sobre a imagem)
+// x, y = canto inferior direito de cada célula (% sobre a imagem),
+// cw, ch = largura/altura da célula (% sobre a imagem),
+// grupo = bloco visual da colagem (para "Outros notáveis")
 var PESSOAS = [
-  // Linha 1 — 4 colunas iguais
-  { n:1,  nome:'Maria de Kalú',        x:23,   y:20   },
-  { n:2,  nome:'Leci Brandão',         x:48,   y:20   },
-  { n:3,  nome:'Marta (jogadora)',     x:74,   y:20   },
-  { n:4,  nome:'Joanna (cantora)',     x:97,   y:20   },
+  // Linha 1 — 4 colunas
+  { n:1,  nome:'Alexandre Ivo',        x:24.3, y:17.5, cw:25, ch:17.5, grupo:'r1' },
+  { n:2,  nome:'Cassandra Rios',       x:51.4, y:17.5, cw:25, ch:17.5, grupo:'r1' },
+  { n:3,  nome:'Cláudia Celeste',      x:75,   y:17.5, cw:25, ch:17.5, grupo:'r1' },
+  { n:4,  nome:'Clóvis Bornay',        x:100,  y:17.5, cw:25, ch:17.5, grupo:'r1' },
   // Linha 2 — 3 colunas (col.4 = foto do olho, sem hotspot)
-  { n:5,  nome:'Roberta Miranda',      x:23,   y:37   },
-  { n:6,  nome:'Daniela Mercury',      x:48,   y:37   },
-  { n:7,  nome:'Rosely Roth',          x:74,   y:37   },
+  { n:5,  nome:'Daniela Mercury',      x:25,   y:33,   cw:25, ch:15.5, grupo:'r2' },
+  { n:6,  nome:'Edy Star',             x:50,   y:33,   cw:25, ch:15.5, grupo:'r2' },
+  { n:7,  nome:'Fátima Bezerra',       x:75,   y:33,   cw:25, ch:15.5, grupo:'r2' },
+  // Bloco central — coluna 1 (célula vertical do dançarino)
+  { n:21, nome:'Geórgia Bengston',     x:25,   y:65,   cw:25, ch:32,   grupo:'mid' },
   // Bloco central direito — 8,9 em cima / 10,11 embaixo
-  { n:8,  nome:'Cassandra Rios',       x:78,   y:55   },
-  { n:9,  nome:'Fátima Bezerra',       x:97,   y:55   },
-  { n:10, nome:'Lacraia',              x:78,   y:68   },
-  { n:11, nome:'Edy Star',             x:97,   y:68   },
-  // Linha 4 — 4 colunas
-  { n:12, nome:'Luana Barbosa',        x:23,   y:77   },
-  { n:13, nome:'Alexandre Ivo Rajão',  x:48,   y:77   },
-  { n:14, nome:'Lucas Fortuna',        x:74,   y:77   },
-  { n:15, nome:'Osvaldo Nunes',        x:97,   y:77   },
-  // Linha 5 — 5 colunas
-  { n:16, nome:'Clóvis Bornay',        x:20,   y:97   },
-  { n:17, nome:'Joaozinho Trinta',     x:38,   y:97   },
-  { n:18, nome:'Joaosinho da Goméia',  x:58,   y:97   },
-  { n:19, nome:'Cláudia Celeste',      x:77,   y:97   },
-  { n:20, nome:'Lorna Washington',     x:90,   y:97   },
-  // Meio esquerdo — coluna 1 do bloco central
-  { n:21, nome:'Geórgia Bengston',     x:23,   y:68   },
+  { n:8,  nome:'Joanna',               x:80,   y:49,   cw:20, ch:16,   grupo:'mid' },
+  { n:9,  nome:'Joãozinho da Goméia',  x:100,  y:49,   cw:20, ch:16,   grupo:'mid' },
+  { n:10, nome:'Joãozinho Trinta',     x:80,   y:65,   cw:20, ch:16,   grupo:'mid' },
+  { n:11, nome:'Lacraia',              x:100,  y:65,   cw:20, ch:16,   grupo:'mid' },
+  // Linha 4 — 5 colunas iguais
+  { n:12, nome:'Leci Brandão',         x:20,   y:82.5, cw:20, ch:17.5, grupo:'r4' },
+  { n:13, nome:'Lorna',                x:40,   y:82.5, cw:20, ch:17.5, grupo:'r4' },
+  { n:14, nome:'Luana Barboza',        x:60,   y:82.5, cw:20, ch:17.5, grupo:'r4' },
+  { n:15, nome:'Maria de Kalú',        x:80,   y:82.5, cw:20, ch:17.5, grupo:'r4' },
+  { n:16, nome:'Lucas Fortuna',        x:100,  y:82.5, cw:20, ch:17.5, grupo:'r4' },
+  // Linha 5 — 4 colunas + logo (sem hotspot na col.5)
+  { n:17, nome:'Osvaldo Nunes',        x:20,   y:99,   cw:20, ch:16.5, grupo:'r5' },
+  { n:18, nome:'Marta',                x:40,   y:99,   cw:20, ch:16.5, grupo:'r5' },
+  { n:19, nome:'Roberta Miranda',      x:60,   y:99,   cw:20, ch:16.5, grupo:'r5' },
+  { n:20, nome:'Rosely Roth',          x:80,   y:99,   cw:20, ch:16.5, grupo:'r5' },
 ];
 
+// Lista ordenada por nº para navegação prev/próximo
+var PESSOAS_BY_N = PESSOAS.slice().sort(function (a, b) { return a.n - b.n; });
+
 var LOREM = 'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur.';
+
+// ═══════════════════════════════════════════════════════════════
+// TWEAKS: estado padrão (persistido pelo host através do bloco abaixo)
+// ═══════════════════════════════════════════════════════════════
+var TWEAKS = /*EDITMODE-BEGIN*/{
+  "atmosfera": "zine",
+  "descoberta": "sempre",
+  "revelacao": "lateral"
+}/*EDITMODE-END*/;
+
+var HINTS = {
+  atmosfera: {
+    museu:  'sóbrio · papel · serifa',
+    zine:   'magenta · halftone · carimbo',
+    festa:  'neon · scanlines · glow'
+  },
+  descoberta: {
+    sempre:   'todos marcados, pulsando',
+    sussurro: 'discretos · revelam no hover',
+    proximo:  'só aparecem perto do cursor'
+  },
+  revelacao: {
+    lateral: 'painel à direita',
+    legenda: 'cartão flutuante junto ao retrato',
+    cinema:  'escurece tudo · texto grande'
+  }
+};
 
 var world    = document.getElementById('world');
 var img      = document.getElementById('collage-img');
@@ -288,8 +1357,51 @@ var panel    = document.getElementById('panel');
 var panelNum = document.getElementById('panel-num');
 var panelNom = document.getElementById('panel-name');
 var panelDes = document.getElementById('panel-desc');
+var panelHeadNum  = document.getElementById('panel-head-num');
+var panelHeadName = document.getElementById('panel-head-name');
+var panelPortrait = document.getElementById('panel-portrait');
+var panelQuoteTxt = document.getElementById('panel-quote-text');
+var panelChips    = document.getElementById('panel-related-chips');
+var btnPrev   = document.getElementById('btn-prev');
+var btnNext   = document.getElementById('btn-next');
+var btnNarrate = document.getElementById('btn-narrate');
 var btnClose = document.getElementById('btn-close');
 var hint     = document.getElementById('hint');
+var missing  = document.getElementById('missing-note');
+var captionEl  = document.getElementById('caption');
+var capNum     = document.getElementById('caption-num');
+var capName    = document.getElementById('caption-name');
+var capDesc    = document.getElementById('caption-desc');
+var cinemaEl   = document.getElementById('cinema');
+var cineNum    = document.getElementById('cinema-num');
+var cineName   = document.getElementById('cinema-name');
+var cineDesc   = document.getElementById('cinema-desc');
+
+var activePerson = null; // pessoa exibida no painel lateral
+
+// Se a imagem real não carregar, usa placeholder para o palco ter tamanho
+img.addEventListener('error', function () {
+  img.classList.add('is-placeholder');
+  img.removeAttribute('src');
+  syncWorld();
+});
+img.addEventListener('load', function () {
+  if (missing) missing.style.display = 'none';
+  syncWorld();
+});
+
+// Sincroniza dimensões do #world com o tamanho renderizado da imagem,
+// para que % dos hotspots batam com o conteúdo visível.
+function syncWorld() {
+  var w = img.offsetWidth, h = img.offsetHeight;
+  if (w && h) {
+    world.style.width  = w + 'px';
+    world.style.height = h + 'px';
+  }
+}
+window.addEventListener('resize', syncWorld);
+// chamada inicial (caso a imagem já esteja no cache)
+if (img.complete) syncWorld();
 
 // ── Hotspots ──
 var activeEl = null;
@@ -302,61 +1414,526 @@ PESSOAS.forEach(function (p) {
   el.style.top  = p.y + '%';
   el.setAttribute('title', p.nome);
   el.addEventListener('click', function (e) {
+    if (calibrarOn) return; // em calibrar, click apenas seleciona via pointerdown
     e.stopPropagation();
     openPanel(p, el);
   });
+  wireDrag(el, p);
   world.appendChild(el);
 });
 
-// ── Panel ──
+// ── Panel: despacha pro modo de revelação ativo ──
 function openPanel(p, el) {
   if (activeEl) activeEl.classList.remove('is-open');
   activeEl = el;
   el.classList.add('is-open');
-  panelNum.textContent = String(p.n).padStart(2, '0');
-  panelNom.textContent = p.nome;
-  panelDes.textContent = LOREM;
+  hint.style.opacity = '0';
+
+  var num = String(p.n).padStart(2, '0');
+  var mode = TWEAKS.revelacao;
+
+  if (mode === 'legenda') openLegenda(p, el, num);
+  else if (mode === 'cinema') openCinema(p, num);
+  else openLateral(p, num);
+}
+
+function openLateral(p, num) {
+  activePerson = p;
+  // remove e re-adiciona .on pra disparar a animação em cascata em troca
+  var wasOn = panel.classList.contains('on');
+  panel.classList.remove('on');
+  // reflow para reiniciar animações
+  void panel.offsetWidth;
+
+  // popula campos
+  panelNum.textContent      = num;
+  panelHeadNum.textContent  = num;
+  panelNom.textContent      = p.nome;
+  panelHeadName.textContent = p.nome;
+  panelDes.textContent      = LOREM;
+  panelQuoteTxt.textContent = 'Citação em destaque sobre ' + p.nome + ' — colocar uma frase marcante aqui.';
+
+  // retrato recortado da colagem
+  setPortrait(panelPortrait, p);
+
+  // links externos com URLs de busca como placeholder
+  var q = encodeURIComponent(p.nome);
+  panel.querySelectorAll('.panel-link').forEach(function (a) {
+    if (a.dataset.kind === 'spotify') a.href = 'https://open.spotify.com/search/' + q;
+    if (a.dataset.kind === 'wiki')    a.href = 'https://pt.wikipedia.org/wiki/Special:Search?search=' + q;
+  });
+
+  // outros notáveis do mesmo grupo visual
+  buildRelated(p);
+
+  // estado dos botões prev/next
+  updateNavButtons();
+
+  // narrator (parar se estiver tocando)
+  stopNarration();
+
   panel.scrollTop = 0;
   panel.classList.add('on');
   overlay.classList.add('on');
-  hint.style.opacity = '0';
+  panel.setAttribute('aria-hidden', 'false');
+
+  // spotlight: clip-path com furo na célula
+  setSpotlight(p);
+
+  // sync URL
+  syncUrl(p);
+  void wasOn;
+}
+
+// Aspect e crop do retrato a partir da colagem
+var COLLAGE_W = 2016, COLLAGE_H = 2112;
+function setPortrait(el, p) {
+  var aspect = (p.cw * COLLAGE_W) / (p.ch * COLLAGE_H);
+  // limite vertical: células muito altas (Geórgia) ficariam enormes — cap em 0.85
+  aspect = Math.max(0.75, Math.min(1.7, aspect));
+  el.style.aspectRatio = aspect.toString();
+  var bgW = 100 / p.cw * 100;
+  var bgH = 100 / p.ch * 100;
+  var bgX = -100 * (p.x - p.cw) / Math.max(0.001, (100 - p.cw));
+  var bgY = -100 * (p.y - p.ch) / Math.max(0.001, (100 - p.ch));
+  // casos limite quando cw/ch == 100 (não ocorre aqui) viraria divisão por zero
+  el.style.backgroundSize = bgW + '% ' + bgH + '%';
+  el.style.backgroundPosition = bgX + '% ' + bgY + '%';
+}
+
+// Outros notáveis do mesmo grupo visual
+function buildRelated(p) {
+  var sameGroup = PESSOAS.filter(function (x) {
+    return x.grupo === p.grupo && x.n !== p.n;
+  }).sort(function (a, b) { return a.n - b.n; });
+  panelChips.innerHTML = '';
+  sameGroup.slice(0, 4).forEach(function (other) {
+    var chip = document.createElement('button');
+    chip.type = 'button';
+    chip.className = 'panel-related-chip';
+    chip.innerHTML = '<span class="panel-related-chip-num">' +
+      String(other.n).padStart(2, '0') +
+      '</span>' + escapeHtml(other.nome);
+    chip.addEventListener('click', function () {
+      openPanel(other, findHotspotEl(other));
+    });
+    panelChips.appendChild(chip);
+  });
+  if (sameGroup.length === 0) {
+    panelChips.innerHTML = '<span style="color: rgba(255,255,255,0.3); font-size: 12px;">—</span>';
+  }
+}
+
+function findHotspotEl(p) {
+  // o hotspot da pessoa tem title === nome
+  return world.querySelector('.hs[title="' + cssEscape(p.nome) + '"]');
+}
+function cssEscape(s) {
+  return String(s).replace(/"/g, '\\"');
+}
+
+// Navegação prev/next
+function navigateBy(delta) {
+  if (!activePerson) return;
+  var idx = PESSOAS_BY_N.findIndex(function (p) { return p.n === activePerson.n; });
+  if (idx < 0) return;
+  var next = PESSOAS_BY_N[(idx + delta + PESSOAS_BY_N.length) % PESSOAS_BY_N.length];
+  openPanel(next, findHotspotEl(next));
+}
+function updateNavButtons() {
+  // habilitar ambos (loop) — mas indicar se está no extremo via opacidade sutil
+  if (!activePerson) { btnPrev.disabled = btnNext.disabled = true; return; }
+  btnPrev.disabled = btnNext.disabled = false;
+  btnPrev.style.opacity = btnNext.style.opacity = '1';
+}
+btnPrev.addEventListener('click', function () { navigateBy(-1); });
+btnNext.addEventListener('click', function () { navigateBy(+1); });
+
+// Narrador (Web Speech API)
+var speakingForN = null;
+function stopNarration() {
+  try { window.speechSynthesis && window.speechSynthesis.cancel(); } catch (e) {}
+  speakingForN = null;
+  btnNarrate && btnNarrate.classList.remove('is-playing');
+}
+function toggleNarrate() {
+  var synth = window.speechSynthesis;
+  if (!synth || !activePerson) { return; }
+  // se está falando pra esta pessoa, pare
+  if (speakingForN === activePerson.n) { stopNarration(); return; }
+  synth.cancel();
+  var text = activePerson.nome + '. ' + LOREM;
+  var u = new SpeechSynthesisUtterance(text);
+  u.lang = 'pt-BR';
+  u.rate = 0.95;
+  u.pitch = 1.0;
+  u.onend = function () { stopNarration(); };
+  u.onerror = function () { stopNarration(); };
+  speakingForN = activePerson.n;
+  synth.speak(u);
+  btnNarrate.classList.add('is-playing');
+}
+if (btnNarrate) btnNarrate.addEventListener('click', toggleNarrate);
+
+// URL permalink
+function slug(s) {
+  return String(s).toLowerCase()
+    .normalize('NFD').replace(/[\u0300-\u036f]/g, '')
+    .replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '');
+}
+function syncUrl(p) {
+  try { history.replaceState({}, '', '?id=' + slug(p.nome)); } catch (e) {}
+}
+function clearUrl() {
+  try { history.replaceState({}, '', location.pathname); } catch (e) {}
+}
+function readUrlPerson() {
+  var m = /[?&]id=([^&]+)/.exec(location.search);
+  if (!m) return null;
+  var id = decodeURIComponent(m[1]);
+  return PESSOAS.find(function (p) { return slug(p.nome) === id; });
+}
+
+// Spotlight: clip-path no overlay com furo na célula
+function setSpotlight(p) {
+  var r = img.getBoundingClientRect();
+  var x1 = (p.x - p.cw) / 100 * r.width  + r.left;
+  var y1 = (p.y - p.ch) / 100 * r.height + r.top;
+  var x2 = x1 + p.cw / 100 * r.width;
+  var y2 = y1 + p.ch / 100 * r.height;
+  // pad pequeno para que o furo respire ao redor da célula
+  var pad = 4;
+  x1 -= pad; y1 -= pad; x2 += pad; y2 += pad;
+  var cl =
+    'polygon(' +
+      '0 0, 100% 0, 100% 100%, 0 100%, 0 0, ' +
+      x1 + 'px ' + y1 + 'px, ' +
+      x1 + 'px ' + y2 + 'px, ' +
+      x2 + 'px ' + y2 + 'px, ' +
+      x2 + 'px ' + y1 + 'px, ' +
+      x1 + 'px ' + y1 + 'px' +
+    ')';
+  overlay.style.clipPath = cl;
+  overlay.style.webkitClipPath = cl;
+  overlay.style.background = 'rgba(0,0,0,0.66)';
+}
+function clearSpotlight() {
+  overlay.style.clipPath = '';
+  overlay.style.webkitClipPath = '';
+  overlay.style.background = '';
+}
+window.addEventListener('resize', function () {
+  if (activePerson && panel.classList.contains('on')) setSpotlight(activePerson);
+});
+
+function openLegenda(p, el, num) {
+  capNum.textContent  = '.' + num;
+  capName.textContent = p.nome;
+  capDesc.textContent = LOREM.slice(0, 180) + '…';
+  // Posiciona o cartão próximo ao hotspot, dentro do viewport
+  captionEl.classList.add('on');
+  // mede e ajusta posição
+  var rect = el.getBoundingClientRect();
+  var cw = captionEl.offsetWidth;
+  var ch = captionEl.offsetHeight;
+  var pad = 12;
+  // tenta colocar abaixo-esquerda do hotspot; se não couber, vira pro outro lado
+  var x = rect.left - cw - pad;
+  var y = rect.bottom + pad;
+  if (x < 8) x = rect.right + pad;
+  if (x + cw > window.innerWidth - 8) x = Math.max(8, window.innerWidth - cw - 8);
+  if (y + ch > window.innerHeight - 8) y = rect.top - ch - pad;
+  if (y < 8) y = 8;
+  captionEl.style.left = x + 'px';
+  captionEl.style.top  = y + 'px';
+}
+
+function openCinema(p, num) {
+  cineNum.textContent  = '.' + num;
+  cineName.textContent = p.nome;
+  cineDesc.textContent = LOREM;
+  cinemaEl.classList.add('on');
 }
 
 function closePanel() {
   panel.classList.remove('on');
   overlay.classList.remove('on');
+  panel.setAttribute('aria-hidden', 'true');
+  clearSpotlight();
+  captionEl.classList.remove('on');
+  cinemaEl.classList.remove('on');
   if (activeEl) { activeEl.classList.remove('is-open'); activeEl = null; }
+  activePerson = null;
+  stopNarration();
+  clearUrl();
 }
 
 btnClose.addEventListener('click', closePanel);
 overlay.addEventListener('click', closePanel);
-document.addEventListener('keydown', function (e) {
-  if (e.key === 'Escape') closePanel();
+cinemaEl.addEventListener('click', closePanel);
+// fechar legenda ao clicar fora
+document.addEventListener('click', function (e) {
+  if (TWEAKS.revelacao !== 'legenda') return;
+  if (!captionEl.classList.contains('on')) return;
+  if (e.target.closest('#caption') || e.target.closest('.hs') || e.target.closest('#tweaks')) return;
+  closePanel();
 });
-
-// ── Sizing: controlado por CSS (max-width/max-height) ──
+document.addEventListener('keydown', function (e) {
+  if (e.key === 'Escape') { closePanel(); closeTweaks(); }
+});
 
 // ── Hint ──
 setTimeout(function () { hint.style.opacity = '0'; }, 4500);
 
-// ── DEBUG: mostrar coordenadas ao clicar/tocar ──
-var coords = document.createElement('div');
-coords.style.cssText = 'position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);background:rgba(0,0,0,0.92);color:#ff0;font-size:22px;font-weight:900;padding:16px 28px;border-radius:10px;z-index:9999;pointer-events:none;font-family:monospace;display:none;';
-document.body.appendChild(coords);
-function showCoords(clientX, clientY) {
-  var r = img.getBoundingClientRect();
-  var x = ((clientX - r.left) / r.width * 100).toFixed(1);
-  var y = ((clientY - r.top)  / r.height * 100).toFixed(1);
-  coords.textContent = 'x:' + x + '  y:' + y;
-  coords.style.display = 'block';
+// ═══════════════════════════════════════════════════════════════
+// TWEAKS: aplicação + UI + protocolo de persistência
+// ═══════════════════════════════════════════════════════════════
+var tweaksEl    = document.getElementById('tweaks');
+var tweaksClose = document.getElementById('tweaks-close');
+var hsList      = []; // populated below
+
+function applyTweaks() {
+  document.body.setAttribute('data-atmosfera',  TWEAKS.atmosfera);
+  document.body.setAttribute('data-descoberta', TWEAKS.descoberta);
+  document.body.setAttribute('data-revelacao',  TWEAKS.revelacao);
+
+  // marca botões ativos
+  var groups = tweaksEl.querySelectorAll('.tw-seg');
+  groups.forEach(function (g) {
+    var key = g.dataset.key;
+    var val = TWEAKS[key];
+    g.querySelectorAll('button').forEach(function (b) {
+      b.classList.toggle('is-active', b.dataset.value === val);
+    });
+    var hintEl = tweaksEl.querySelector('[data-hint="' + key + '"]');
+    if (hintEl && HINTS[key] && HINTS[key][val]) hintEl.textContent = HINTS[key][val];
+  });
+
+  // fechar qualquer painel aberto quando modo de revelação muda
+  closePanel();
 }
-document.getElementById('stage').addEventListener('click', function(e) {
-  showCoords(e.clientX, e.clientY);
+
+// Ligação dos botões
+tweaksEl.querySelectorAll('.tw-seg button').forEach(function (btn) {
+  btn.addEventListener('click', function () {
+    var key = btn.parentElement.dataset.key;
+    var val = btn.dataset.value;
+    if (TWEAKS[key] === val) return;
+    TWEAKS[key] = val;
+    applyTweaks();
+    // persistir via host
+    try {
+      window.parent.postMessage({
+        type: '__edit_mode_set_keys',
+        edits: (function () { var o = {}; o[key] = val; return o; })()
+      }, '*');
+    } catch (e) {}
+  });
 });
-document.getElementById('stage').addEventListener('touchend', function(e) {
-  var t = e.changedTouches[0];
-  showCoords(t.clientX, t.clientY);
+
+// ═══════════════════════════════════════════════════════════════════════
+// CALIBRAR: arrastar hotspots, setas pra fine-tune, copiar coordenadas
+// ═══════════════════════════════════════════════════════════════════════
+var calibrarOn = false;
+var calBtn      = document.getElementById('tw-calibrar');
+var calLabel    = calBtn.querySelector('.tw-toggle-label');
+var calPane     = document.getElementById('tw-cal-pane');
+var calTarget   = document.getElementById('tw-cal-target');
+var calCopy     = document.getElementById('tw-copy');
+var toastEl     = document.getElementById('tw-toast');
+
+var dragging = null;    // { el, p, moved }
+var selected = null;    // { el, p }
+
+function setCalibrar(on) {
+  calibrarOn = !!on;
+  document.body.setAttribute('data-calibrar', calibrarOn ? 'on' : 'off');
+  calBtn.classList.toggle('is-on', calibrarOn);
+  calLabel.textContent = calibrarOn ? 'Modo de ajuste — ligado' : 'Modo de ajuste — desligado';
+  calPane.classList.toggle('on', calibrarOn);
+  if (!calibrarOn && selected) {
+    selected.el.classList.remove('is-cal-selected');
+    selected = null;
+    updateCalTarget();
+  }
+  // fecha qualquer painel aberto ao entrar/sair
+  closePanel();
+}
+calBtn.addEventListener('click', function () { setCalibrar(!calibrarOn); });
+
+function selectHotspot(el, p) {
+  if (selected && selected.el !== el) selected.el.classList.remove('is-cal-selected');
+  selected = { el: el, p: p };
+  el.classList.add('is-cal-selected');
+  updateCalTarget();
+}
+function updateCalTarget() {
+  if (!selected) {
+    calTarget.innerHTML = 'Arraste qualquer hotspot<small>Setas: 1px · Shift+setas: 10px</small>';
+    return;
+  }
+  var p = selected.p;
+  var num = String(p.n).padStart(2, '0');
+  calTarget.innerHTML =
+    '.' + num + ' &middot; ' + escapeHtml(p.nome) +
+    '<small>x: ' + Number(p.x).toFixed(2) + '%  &middot;  y: ' + Number(p.y).toFixed(2) + '%</small>';
+}
+function escapeHtml(s) {
+  return String(s).replace(/[&<>"']/g, function (c) {
+    return { '&':'&amp;', '<':'&lt;', '>':'&gt;', '"':'&quot;', "'":'&#39;' }[c];
+  });
+}
+
+function wireDrag(el, p) {
+  el.addEventListener('pointerdown', function (e) {
+    if (!calibrarOn) return;
+    e.preventDefault();
+    e.stopPropagation();
+    selectHotspot(el, p);
+    dragging = { el: el, p: p, moved: false };
+    try { el.setPointerCapture(e.pointerId); } catch (_) {}
+  });
+  el.addEventListener('pointermove', function (e) {
+    if (!dragging || dragging.el !== el) return;
+    var r = world.getBoundingClientRect();
+    var x = (e.clientX - r.left) / r.width  * 100;
+    var y = (e.clientY - r.top)  / r.height * 100;
+    p.x = Math.max(0, Math.min(105, +x.toFixed(2)));
+    p.y = Math.max(0, Math.min(105, +y.toFixed(2)));
+    el.style.left = p.x + '%';
+    el.style.top  = p.y + '%';
+    dragging.moved = true;
+    updateCalTarget();
+  });
+  el.addEventListener('pointerup', function (e) {
+    if (dragging) dragging = null;
+    try { el.releasePointerCapture(e.pointerId); } catch (_) {}
+  });
+  el.addEventListener('pointercancel', function () { dragging = null; });
+}
+
+// Setas movem o hotspot selecionado
+document.addEventListener('keydown', function (e) {
+  if (!calibrarOn || !selected) return;
+  if (['ArrowLeft','ArrowRight','ArrowUp','ArrowDown'].indexOf(e.key) === -1) return;
+  e.preventDefault();
+  var r = world.getBoundingClientRect();
+  var step = e.shiftKey ? 10 : 1;
+  var dx = step / r.width  * 100;
+  var dy = step / r.height * 100;
+  var p = selected.p;
+  if (e.key === 'ArrowLeft')  p.x -= dx;
+  if (e.key === 'ArrowRight') p.x += dx;
+  if (e.key === 'ArrowUp')    p.y -= dy;
+  if (e.key === 'ArrowDown')  p.y += dy;
+  p.x = +Number(p.x).toFixed(2);
+  p.y = +Number(p.y).toFixed(2);
+  selected.el.style.left = p.x + '%';
+  selected.el.style.top  = p.y + '%';
+  updateCalTarget();
 });
+
+// Copiar coordenadas
+function showToast(msg) {
+  toastEl.textContent = msg;
+  toastEl.classList.add('on');
+  clearTimeout(showToast._t);
+  showToast._t = setTimeout(function () { toastEl.classList.remove('on'); }, 1800);
+}
+calCopy.addEventListener('click', function () {
+  var lines = PESSOAS.map(function (p) {
+    return '  { n:' + p.n + ', nome:' + JSON.stringify(p.nome) + ', x:' + p.x + ', y:' + p.y + ' },';
+  });
+  var text = 'var PESSOAS = [\n' + lines.join('\n') + '\n];';
+  try {
+    navigator.clipboard.writeText(text).then(
+      function () { showToast('Coordenadas copiadas ✓'); },
+      function () { fallback(); }
+    );
+  } catch (e) { fallback(); }
+  function fallback() {
+    var ta = document.createElement('textarea');
+    ta.value = text; ta.style.position = 'fixed'; ta.style.opacity = '0';
+    document.body.appendChild(ta); ta.select();
+    try { document.execCommand('copy'); showToast('Coordenadas copiadas ✓'); }
+    catch (_) { showToast('Falhou — veja no console'); console.log(text); }
+    document.body.removeChild(ta);
+  }
+});
+
+// ── Hotspots: lista para o modo "proximo" ──
+hsList = Array.prototype.slice.call(world.querySelectorAll('.hs'));
+
+// ── Modo "proximo": atualiza opção baseada na distância do cursor ──
+var PROX_RADIUS = 140; // px
+function updateProximity(clientX, clientY) {
+  if (TWEAKS.descoberta !== 'proximo') return;
+  for (var i = 0; i < hsList.length; i++) {
+    var el = hsList[i];
+    var r = el.getBoundingClientRect();
+    var cx = r.left + r.width/2;
+    var cy = r.top  + r.height/2;
+    var dx = clientX - cx, dy = clientY - cy;
+    var d = Math.sqrt(dx*dx + dy*dy);
+    el.classList.toggle('is-near', d < PROX_RADIUS);
+  }
+}
+document.addEventListener('mousemove', function (e) {
+  updateProximity(e.clientX, e.clientY);
+});
+document.addEventListener('touchmove', function (e) {
+  if (e.touches[0]) updateProximity(e.touches[0].clientX, e.touches[0].clientY);
+});
+
+// ── Toggle do painel de Tweaks via protocolo host ──
+function openTweaks()  { tweaksEl.classList.add('on'); }
+function closeTweaks() {
+  tweaksEl.classList.remove('on');
+  try { window.parent.postMessage({type: '__edit_mode_dismissed'}, '*'); } catch (e) {}
+}
+tweaksClose.addEventListener('click', closeTweaks);
+
+window.addEventListener('message', function (e) {
+  var d = e.data || {};
+  if (d.type === '__activate_edit_mode')   openTweaks();
+  if (d.type === '__deactivate_edit_mode') tweaksEl.classList.remove('on');
+});
+// Anuncia disponibilidade DEPOIS de registrar o listener
+try { window.parent.postMessage({type: '__edit_mode_available'}, '*'); } catch (e) {}
+
+// ── Drag do painel ──
+(function () {
+  var head = document.getElementById('tweaks-head');
+  var dragging = false, sx = 0, sy = 0, px = 0, py = 0;
+  head.addEventListener('mousedown', function (e) {
+    if (e.target.id === 'tweaks-close') return;
+    dragging = true;
+    sx = e.clientX; sy = e.clientY;
+    var r = tweaksEl.getBoundingClientRect();
+    px = r.left; py = r.top;
+    e.preventDefault();
+  });
+  document.addEventListener('mousemove', function (e) {
+    if (!dragging) return;
+    var nx = px + (e.clientX - sx);
+    var ny = py + (e.clientY - sy);
+    nx = Math.max(8, Math.min(window.innerWidth - tweaksEl.offsetWidth - 8, nx));
+    ny = Math.max(8, Math.min(window.innerHeight - tweaksEl.offsetHeight - 8, ny));
+    tweaksEl.style.left = nx + 'px';
+    tweaksEl.style.top  = ny + 'px';
+    tweaksEl.style.right = 'auto';
+  });
+  document.addEventListener('mouseup', function () { dragging = false; });
+})();
+
+// Aplica estado inicial
+applyTweaks();
+
+// Abre via URL se ?id=... estiver presente (depois de tudo inicializado)
+setTimeout(function () {
+  var p = readUrlPerson();
+  if (p) openPanel(p, findHotspotEl(p));
+}, 50);
 
 })();
 </script>
