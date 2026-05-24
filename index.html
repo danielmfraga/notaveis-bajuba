@@ -339,6 +339,17 @@ document.addEventListener('keydown', function (e) {
 // ── Hint ──
 setTimeout(function () { hint.style.opacity = '0'; }, 4500);
 
+// ── DEBUG: mostrar coordenadas ao passar o mouse ──
+var coords = document.createElement('div');
+coords.style.cssText = 'position:fixed;top:8px;left:8px;background:rgba(0,0,0,0.85);color:#ff0;font-size:14px;font-weight:700;padding:6px 12px;border-radius:6px;z-index:9999;pointer-events:none;font-family:monospace;';
+document.body.appendChild(coords);
+img.addEventListener('mousemove', function(e) {
+  var r = img.getBoundingClientRect();
+  var x = ((e.clientX - r.left) / r.width * 100).toFixed(1);
+  var y = ((e.clientY - r.top)  / r.height * 100).toFixed(1);
+  coords.textContent = 'x: ' + x + '%  y: ' + y + '%';
+});
+
 })();
 </script>
 </body>
