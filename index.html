@@ -1149,6 +1149,9 @@ body[data-calibrar="on"] .hs.is-cal-selected {
   <div id="world">
     <img id="collage-img" src="collage.webp" alt="Notáveis Bajubá" draggable="false">
     <div id="missing-note">[ colagem ausente — adicione collage.webp ao projeto ]</div>
+    <a href="https://museubajuba.org/" target="_blank" rel="noopener"
+       aria-label="Museu Bajubá"
+       style="position:absolute;left:80%;top:82.5%;width:20%;height:17.5%;z-index:10;"></a>
   </div>
 </div>
 
@@ -1186,32 +1189,6 @@ body[data-calibrar="on"] .hs.is-cal-selected {
 
     <div id="panel-desc" class="panel-fade"></div>
 
-    <div class="panel-media panel-fade">
-      <button id="btn-narrate" class="panel-mediabtn" type="button">
-        <span class="ic-play" aria-hidden="true">▶</span>
-        <span class="ic-stop" aria-hidden="true">■</span>
-        <span class="lbl-play">Ouvir biografia</span>
-        <span class="lbl-stop">Parar</span>
-      </button>
-    </div>
-
-    <div class="panel-aux panel-fade">
-      <div class="panel-aux-label">imagem secundária</div>
-      <div class="panel-aux-hint">capa de disco, foto de palco, cartaz, etc.</div>
-    </div>
-
-    <div class="panel-links panel-fade">
-      <a class="panel-link" href="#" data-kind="spotify" target="_blank" rel="noopener">
-        <span class="panel-link-dot"></span>
-        Ouvir no Spotify
-        <span class="panel-link-arrow">↗</span>
-      </a>
-      <a class="panel-link" href="#" data-kind="wiki" target="_blank" rel="noopener">
-        <span class="panel-link-dot"></span>
-        Saiba mais · Wikipédia
-        <span class="panel-link-arrow">↗</span>
-      </a>
-    </div>
 
     <div class="panel-related panel-fade">
       <div class="panel-related-label">Outros notáveis</div>
@@ -1299,32 +1276,32 @@ body[data-calibrar="on"] .hs.is-cal-selected {
 // grupo = bloco visual da colagem (para "Outros notáveis")
 var PESSOAS = [
   // Linha 1 — 4 colunas
-  { n:1,  nome:'Alexandre Ivo',        x:24.3, y:17.5, cw:25, ch:17.5, grupo:'r1' },
-  { n:2,  nome:'Cassandra Rios',       x:51.4, y:17.5, cw:25, ch:17.5, grupo:'r1' },
-  { n:3,  nome:'Cláudia Celeste',      x:75,   y:17.5, cw:25, ch:17.5, grupo:'r1' },
-  { n:4,  nome:'Clóvis Bornay',        x:98.51, y:17.5, cw:25, ch:17.5, grupo:'r1' },
+  { n:1,  nome:'Alexandre Ivo',        x:24.3,  y:17.5,  cw:25, ch:17.5, grupo:'r1', foto:'1. Alexandre Ivo.jpg' },
+  { n:2,  nome:'Cassandra Rios',       x:51.4,  y:17.5,  cw:25, ch:17.5, grupo:'r1', foto:'2. Cassandra Rios.jpg' },
+  { n:3,  nome:'Cláudia Celeste',      x:75,    y:17.5,  cw:25, ch:17.5, grupo:'r1', foto:'3. Cláudia Celeste.jpg' },
+  { n:4,  nome:'Clóvis Bornay',        x:98.51, y:17.5,  cw:25, ch:17.5, grupo:'r1', foto:'4. Clovis Bornay.jpg' },
   // Linha 2 — 3 colunas (col.4 = foto do olho, sem hotspot)
-  { n:5,  nome:'Daniela Mercury',      x:23.51, y:33,   cw:25, ch:15.5, grupo:'r2' },
-  { n:6,  nome:'Edy Star',             x:50,    y:33,   cw:25, ch:15.5, grupo:'r2' },
-  { n:7,  nome:'Fátima Bezerra',       x:75,   y:33,   cw:25, ch:15.5, grupo:'r2' },
+  { n:5,  nome:'Daniela Mercury',      x:23.51, y:33,    cw:25, ch:15.5, grupo:'r2', foto:'5. Daniela Mercury.jpg' },
+  { n:6,  nome:'Edy Star',             x:50,    y:33,    cw:25, ch:15.5, grupo:'r2', foto:'6. Edy Star.jpg' },
+  { n:7,  nome:'Fátima Bezerra',       x:75,    y:33,    cw:25, ch:15.5, grupo:'r2', foto:'7. Fátima Bezerra.jpg' },
   // Bloco central — coluna 1 (célula vertical do dançarino)
-  { n:21, nome:'Geórgia Bengston',     x:19.05, y:65,   cw:25, ch:32,   grupo:'mid' },
+  { n:21, nome:'Geórgia Bengston',     x:19.05, y:65,    cw:25, ch:32,   grupo:'mid', foto:'21. Geórgia Bengston.jpg' },
   // Bloco central direito — 8,9 em cima / 10,11 embaixo
-  { n:8,  nome:'Joanna',               x:79.26, y:49.43, cw:20, ch:16,   grupo:'mid' },
-  { n:9,  nome:'Joãozinho da Goméia',  x:98.52, y:49,   cw:20, ch:16,   grupo:'mid' },
-  { n:10, nome:'Joãozinho Trinta',     x:80,   y:65,   cw:20, ch:16,   grupo:'mid' },
-  { n:11, nome:'Lacraia',              x:98.52, y:65,   cw:20, ch:16,   grupo:'mid' },
+  { n:8,  nome:'Joanna',               x:79.26, y:49.43, cw:20, ch:16,   grupo:'mid', foto:'8. Joanna.jpg' },
+  { n:9,  nome:'Joãozinho da Goméia',  x:98.52, y:49,    cw:20, ch:16,   grupo:'mid', foto:'9. Joãozinho da Goméia.webp' },
+  { n:10, nome:'Joãozinho Trinta',     x:80,    y:65,    cw:20, ch:16,   grupo:'mid', foto:'10. Joãozinho Trinta.jpg' },
+  { n:11, nome:'Lacraia',              x:98.52, y:65,    cw:20, ch:16,   grupo:'mid', foto:'11. Lacraia.jpg' },
   // Linha 4 — 5 colunas iguais
-  { n:12, nome:'Leci Brandão',         x:20,   y:82.5, cw:20, ch:17.5, grupo:'r4' },
-  { n:13, nome:'Lorna',                x:37.02, y:82.5, cw:20, ch:17.5, grupo:'r4' },
-  { n:14, nome:'Luana Barboza',        x:57.02, y:82.5, cw:20, ch:17.5, grupo:'r4' },
-  { n:15, nome:'Maria de Kalú',        x:80,   y:82.5, cw:20, ch:17.5, grupo:'r4' },
-  { n:16, nome:'Lucas Fortuna',        x:98.52, y:82.5, cw:20, ch:17.5, grupo:'r4' },
+  { n:12, nome:'Leci Brandão',         x:20,    y:82.5,  cw:20, ch:17.5, grupo:'r4', foto:'12. Leci Brandão.jpg' },
+  { n:13, nome:'Lorna',                x:37.02, y:82.5,  cw:20, ch:17.5, grupo:'r4', foto:'13. Lorna.jpg' },
+  { n:14, nome:'Luana Barboza',        x:57.02, y:82.5,  cw:20, ch:17.5, grupo:'r4', foto:'14. Luana Barboza.jpg' },
+  { n:15, nome:'Maria de Kalú',        x:80,    y:82.5,  cw:20, ch:17.5, grupo:'r4', foto:'16. Maria de Kalú.webp' },
+  { n:16, nome:'Lucas Fortuna',        x:98.52, y:82.5,  cw:20, ch:17.5, grupo:'r4', foto:'15. Lucas Fortuna.jpg' },
   // Linha 5 — 4 colunas + logo (sem hotspot na col.5)
-  { n:17, nome:'Osvaldo Nunes',        x:18.81, y:99,   cw:20, ch:16.5, grupo:'r5' },
-  { n:18, nome:'Marta',                x:38.81, y:99,   cw:20, ch:16.5, grupo:'r5' },
-  { n:19, nome:'Roberta Miranda',      x:58.81, y:99,   cw:20, ch:16.5, grupo:'r5' },
-  { n:20, nome:'Rosely Roth',          x:78.81, y:99,   cw:20, ch:16.5, grupo:'r5' },
+  { n:17, nome:'Osvaldo Nunes',        x:18.81, y:99,    cw:20, ch:16.5, grupo:'r5', foto:'18. Osvaldo Nunes.jpg' },
+  { n:18, nome:'Marta',                x:38.81, y:99,    cw:20, ch:16.5, grupo:'r5', foto:'17. Marta.jpg' },
+  { n:19, nome:'Roberta Miranda',      x:58.81, y:99,    cw:20, ch:16.5, grupo:'r5', foto:'19. Roberta Miranda.jpg' },
+  { n:20, nome:'Rosely Roth',          x:78.81, y:99,    cw:20, ch:16.5, grupo:'r5', foto:'20. Rosely Roth.jpg' },
 ];
 
 // Lista ordenada por nº para navegação prev/próximo
@@ -1494,20 +1471,26 @@ function openLateral(p, num) {
   void wasOn;
 }
 
-// Aspect e crop do retrato a partir da colagem
+// Retrato: usa foto individual se disponível, senão recorta da colagem
 var COLLAGE_W = 2016, COLLAGE_H = 2112;
 function setPortrait(el, p) {
-  var aspect = (p.cw * COLLAGE_W) / (p.ch * COLLAGE_H);
-  // limite vertical: células muito altas (Geórgia) ficariam enormes — cap em 0.85
-  aspect = Math.max(0.75, Math.min(1.7, aspect));
-  el.style.aspectRatio = aspect.toString();
-  var bgW = 100 / p.cw * 100;
-  var bgH = 100 / p.ch * 100;
-  var bgX = -100 * (p.x - p.cw) / Math.max(0.001, (100 - p.cw));
-  var bgY = -100 * (p.y - p.ch) / Math.max(0.001, (100 - p.ch));
-  // casos limite quando cw/ch == 100 (não ocorre aqui) viraria divisão por zero
-  el.style.backgroundSize = bgW + '% ' + bgH + '%';
-  el.style.backgroundPosition = bgX + '% ' + bgY + '%';
+  if (p.foto) {
+    el.style.aspectRatio = '1';
+    el.style.backgroundImage = 'url("' + encodeURIComponent(p.foto) + '")';
+    el.style.backgroundSize = 'cover';
+    el.style.backgroundPosition = 'center top';
+  } else {
+    var aspect = (p.cw * COLLAGE_W) / (p.ch * COLLAGE_H);
+    aspect = Math.max(0.75, Math.min(1.7, aspect));
+    el.style.aspectRatio = aspect.toString();
+    var bgW = 100 / p.cw * 100;
+    var bgH = 100 / p.ch * 100;
+    var bgX = -100 * (p.x - p.cw) / Math.max(0.001, (100 - p.cw));
+    var bgY = -100 * (p.y - p.ch) / Math.max(0.001, (100 - p.ch));
+    el.style.backgroundImage = 'url("collage.webp")';
+    el.style.backgroundSize = bgW + '% ' + bgH + '%';
+    el.style.backgroundPosition = bgX + '% ' + bgY + '%';
+  }
 }
 
 // Outros notáveis do mesmo grupo visual
