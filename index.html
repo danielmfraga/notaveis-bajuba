@@ -487,8 +487,9 @@ html, body {
   font-weight: 700;
 }
 
-/* ── Botão de link especial ── */
-#panel-linkbtn {
+/* ── Botões de links especiais ── */
+#panel-links-container { display: flex; flex-direction: column; gap: 8px; }
+.panel-linkbtn {
   display: flex;
   align-items: center;
   gap: 10px;
@@ -508,12 +509,12 @@ html, body {
   transition: background 0.2s, border-color 0.2s, transform 0.1s;
   margin-top: 4px;
 }
-#panel-linkbtn:hover {
+.panel-linkbtn:hover {
   background: linear-gradient(135deg, rgba(218,30,214,0.28), rgba(124,47,247,0.28));
   border-color: rgba(218,30,214,0.7);
 }
-#panel-linkbtn:active { transform: scale(0.98); }
-#panel-linkbtn .lbtn-arrow {
+.panel-linkbtn:active { transform: scale(0.98); }
+.panel-linkbtn .lbtn-arrow {
   margin-left: auto;
   font-size: 16px;
   color: rgba(218,30,214,0.9);
@@ -1239,10 +1240,7 @@ body[data-calibrar="on"] .hs.is-cal-selected {
 
     <div id="panel-desc" class="panel-fade"></div>
 
-    <a id="panel-linkbtn" class="panel-fade" href="#" target="_blank" rel="noopener" style="display:none">
-      <span id="panel-linkbtn-text"></span>
-      <span class="lbtn-arrow">↗</span>
-    </a>
+    <div id="panel-links-container" class="panel-fade"></div>
 
     <div class="panel-related panel-fade">
       <div class="panel-related-label">Outros notáveis</div>
@@ -1336,10 +1334,15 @@ var PESSOAS = [
   // Linha 1 — 4 colunas
   { n:1,  nome:'Alexandre Ivo',        x:24.3,  y:17.5,  cw:25, ch:17.5, grupo:'r1', foto:'1. Alexandre Ivo.jpg',           ref:'Alexandre Ivo, reprodução: revistamarieclaire.globo.com' },
   { n:2,  nome:'Cassandra Rios',       x:51.4,  y:17.5,  cw:25, ch:17.5, grupo:'r1', foto:'2. Cassandra Rios.jpg',           ref:'Cassandra Rios, Revista TPM, Repositório: Biblioteca Nacional — Fonte: Museu Bajubá',
-    linkUrl:'https://museubajuba.org/cassandra-faz-90-anos/', linkLabel:'Conheça a premiada exposição do Museu Bajubá, Cassandra faz 90 anos' },
+    links:[{url:'https://museubajuba.org/cassandra-faz-90-anos/', label:'Conheça a premiada exposição do Museu Bajubá, Cassandra faz 90 anos'}] },
   { n:3,  nome:'Cláudia Celeste',      x:75,    y:17.5,  cw:25, ch:17.5, grupo:'r1', foto:'3. Cláudia Celeste.jpg',          ref:'Cláudia Celeste, cenas da novela Olho por Olho — youtube @claudiaceleste1918',
-    linkUrl:'https://museubajuba.org/claudia-celeste-70-anos/', linkLabel:'Confira o texto exclusivo em homenagem aos seus 70 anos no blog do Museu Bajubá' },
-  { n:4,  nome:'Clóvis Bornay',        x:98.51, y:17.5,  cw:25, ch:17.5, grupo:'r1', foto:'4. Clovis Bornay.jpg',            ref:'Rev. Manchete, 1970 — Acervo Biblioteca Nacional. Fonte: Museu Bajubá' },
+    links:[{url:'https://museubajuba.org/claudia-celeste-70-anos/', label:'Confira o texto exclusivo em homenagem aos seus 70 anos no blog do Museu Bajubá'}] },
+  { n:4,  nome:'Clóvis Bornay',        x:98.51, y:17.5,  cw:25, ch:17.5, grupo:'r1', foto:'4. Clovis Bornay.jpg',            ref:'Rev. Manchete, 1970 — Acervo Biblioteca Nacional. Fonte: Museu Bajubá',
+    links:[
+      {url:'https://museubajuba.org/homenagem-pelos-109-anos-do-nascimento-de-clovis-bornay/', label:'Confira o texto exclusivo "Para lembrar Clóvis Bornay e sua coleção" no blog do Museu Bajubá'},
+      {url:'https://museubajuba.org/oum-location/acervo-clovis-bornay/',                       label:'Confira no mapa interativo o "Acervo Clóvis Bornay"'},
+      {url:'https://museubajuba.org/oum-location/predio-de-clovis-bornay/',                    label:'Confira no mapa interativo a "Casa de Clóvis Bornay"'}
+    ] },
   // Linha 2 — 3 colunas (col.4 = foto do olho, sem hotspot)
   { n:5,  nome:'Daniela Mercury',      x:23.51, y:33,    cw:25, ch:15.5, grupo:'r2', foto:'5. Daniela Mercury.jpg',          ref:'Daniela Mercury no carnaval da Bahia — Foto: Fábio Cerati, commons.wikimedia.org' },
   { n:6,  nome:'Edy Star',             x:50,    y:33,    cw:25, ch:15.5, grupo:'r2', foto:'6. Edy Star.jpg',                 ref:'Reprodução: extra.globo.com' },
@@ -1512,15 +1515,19 @@ function openLateral(p, num) {
   // outros notáveis do mesmo grupo visual
   buildRelated(p);
 
-  // botão de link especial
-  var linkBtn  = document.getElementById('panel-linkbtn');
-  var linkTxt  = document.getElementById('panel-linkbtn-text');
-  if (p.linkUrl) {
-    linkBtn.href = p.linkUrl;
-    linkTxt.textContent = p.linkLabel || p.linkUrl;
-    linkBtn.style.display = 'flex';
-  } else {
-    linkBtn.style.display = 'none';
+  // botões de links especiais
+  var linksContainer = document.getElementById('panel-links-container');
+  linksContainer.innerHTML = '';
+  if (p.links && p.links.length) {
+    p.links.forEach(function (lk) {
+      var a = document.createElement('a');
+      a.className = 'panel-linkbtn';
+      a.href = lk.url;
+      a.target = '_blank';
+      a.rel = 'noopener';
+      a.innerHTML = '<span>' + escapeHtml(lk.label) + '</span><span class="lbtn-arrow">↗</span>';
+      linksContainer.appendChild(a);
+    });
   }
 
   // crédito da foto
