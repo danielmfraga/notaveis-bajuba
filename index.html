@@ -1,0 +1,467 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>Notáveis – Museu Bajubá</title>
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+html, body {
+  width: 100%; height: 100%;
+  overflow: hidden;
+  background: #0a0a0a;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Arial, sans-serif;
+  touch-action: none;
+}
+
+/* ── Stage ── */
+#stage {
+  position: fixed;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+}
+
+/* ── World ── */
+#world {
+  position: relative;
+  cursor: grab;
+  user-select: none;
+  will-change: transform;
+  flex-shrink: 0;
+}
+#world.dragging { cursor: grabbing; }
+
+#collage-img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  pointer-events: none;
+  -webkit-user-drag: none;
+  border-radius: 4px;
+}
+
+/* Placeholder quando imagem não carrega */
+#collage-img[src=""] {
+  background: linear-gradient(135deg, #1a0a1f 0%, #2d0a3a 40%, #1a0020 100%);
+}
+
+/* ── Hotspots ── */
+.hs {
+  position: absolute;
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  background: rgba(218, 30, 214, 0.9);
+  border: 2px solid rgba(255, 255, 255, 0.9);
+  color: #fff;
+  font-size: 9.5px;
+  font-weight: 800;
+  letter-spacing: -0.2px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transform: translate(-50%, -50%);
+  z-index: 10;
+  animation: hs-pulse 3s ease-in-out infinite;
+}
+
+@keyframes hs-pulse {
+  0%, 100% {
+    box-shadow: 0 0 0 0 rgba(218,30,214,0.5), 0 2px 8px rgba(0,0,0,0.4);
+    transform: translate(-50%, -50%) scale(1);
+  }
+  50% {
+    box-shadow: 0 0 0 7px rgba(218,30,214,0), 0 2px 18px rgba(218,30,214,0.6);
+    transform: translate(-50%, -50%) scale(1.14);
+  }
+}
+
+.hs:nth-child(3n+1) { animation-delay: 0s; }
+.hs:nth-child(3n+2) { animation-delay: -1s; }
+.hs:nth-child(3n)   { animation-delay: -2s; }
+
+.hs:hover {
+  animation: none;
+  background: #da1ed6;
+  box-shadow: 0 0 0 5px rgba(218,30,214,0.3), 0 0 24px rgba(218,30,214,0.8);
+  transform: translate(-50%, -50%) scale(1.3) !important;
+  transition: transform 0.15s, box-shadow 0.15s;
+}
+
+.hs.is-open {
+  animation: none;
+  background: #fff;
+  color: #da1ed6;
+  border-color: #da1ed6;
+  box-shadow: 0 0 0 4px rgba(218,30,214,0.3);
+  transform: translate(-50%, -50%) scale(1.2) !important;
+}
+
+/* ── Overlay ── */
+#overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.55);
+  z-index: 50;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.3s ease;
+}
+#overlay.on { opacity: 1; pointer-events: all; }
+
+/* ── Side Panel ── */
+#panel {
+  position: fixed;
+  top: 0; right: 0;
+  width: clamp(280px, 85vw, 390px);
+  height: 100%;
+  background: #0d0916;
+  border-left: 1px solid rgba(218, 30, 214, 0.22);
+  box-shadow: -12px 0 48px rgba(0, 0, 0, 0.7);
+  z-index: 100;
+  transform: translateX(100%);
+  transition: transform 0.38s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+  display: flex;
+  flex-direction: column;
+  overflow-y: auto;
+  overflow-x: hidden;
+  scrollbar-width: thin;
+  scrollbar-color: rgba(218,30,214,0.3) transparent;
+}
+#panel.on { transform: translateX(0); }
+
+#panel::before {
+  content: '';
+  display: block;
+  height: 3px;
+  background: linear-gradient(90deg, #da1ed6, #7c2ff7, #da1ed6);
+  flex-shrink: 0;
+}
+
+#panel-top {
+  padding: 16px 20px 0;
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+}
+
+#panel-num {
+  font-size: 92px;
+  font-weight: 900;
+  line-height: 0.85;
+  letter-spacing: -6px;
+  color: rgba(218, 30, 214, 0.1);
+  flex: 1;
+  padding-top: 2px;
+}
+
+#btn-close {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  background: rgba(255, 255, 255, 0.04);
+  color: rgba(255, 255, 255, 0.55);
+  font-size: 22px;
+  line-height: 1;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  margin-top: 6px;
+  transition: background 0.2s, color 0.2s;
+}
+#btn-close:hover {
+  background: rgba(218, 30, 214, 0.25);
+  color: #fff;
+}
+
+#panel-body { padding: 4px 26px 52px; }
+
+#panel-name {
+  font-size: 26px;
+  font-weight: 800;
+  color: #da1ed6;
+  line-height: 1.2;
+  margin-bottom: 14px;
+}
+
+#panel-bar {
+  width: 38px;
+  height: 3px;
+  background: linear-gradient(90deg, #da1ed6, #7c2ff7);
+  border-radius: 2px;
+  margin-bottom: 18px;
+}
+
+#panel-desc {
+  font-size: 15px;
+  line-height: 1.78;
+  color: rgba(255, 255, 255, 0.7);
+}
+
+/* ── Hint ── */
+#hint {
+  position: fixed;
+  bottom: 22px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: rgba(0, 0, 0, 0.7);
+  backdrop-filter: blur(8px);
+  color: rgba(255, 255, 255, 0.65);
+  font-size: 13px;
+  padding: 8px 20px;
+  border-radius: 24px;
+  border: 1px solid rgba(255,255,255,0.08);
+  z-index: 30;
+  pointer-events: none;
+  white-space: nowrap;
+  transition: opacity 0.7s ease;
+}
+
+/* ── No-image fallback ── */
+#no-image-msg {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  color: rgba(255,255,255,0.3);
+  font-size: 14px;
+  text-align: center;
+  gap: 8px;
+  pointer-events: none;
+}
+#no-image-msg span { font-size: 36px; }
+</style>
+</head>
+<body>
+
+<div id="stage">
+  <div id="world">
+    <img id="collage-img" src="Mural final_BX_WEB.webp" alt="Notáveis Bajubá" draggable="false">
+    <div id="no-image-msg" style="display:none">
+      <span>🖼️</span>
+      Salve a imagem como <strong>collage.jpg</strong><br>
+      na pasta <code>mural/</code>
+    </div>
+  </div>
+</div>
+
+<div id="overlay"></div>
+
+<div id="panel">
+  <div id="panel-top">
+    <div id="panel-num">01</div>
+    <button id="btn-close" aria-label="Fechar">&#215;</button>
+  </div>
+  <div id="panel-body">
+    <div id="panel-name">Nome</div>
+    <div id="panel-bar"></div>
+    <div id="panel-desc"></div>
+  </div>
+</div>
+
+<div id="hint">Toque em uma pessoa para saber mais</div>
+
+<script>
+(function () {
+'use strict';
+
+var PESSOAS = [
+  { n:1,  nome:'Maria de Kalú',        x:11.5, y:10.5 },
+  { n:2,  nome:'Leci Brandão',         x:34,   y:10.5 },
+  { n:3,  nome:'Marta (jogadora)',     x:58,   y:10.5 },
+  { n:4,  nome:'Joanna (cantora)',     x:82,   y:10.5 },
+  { n:5,  nome:'Roberta Miranda',      x:11.5, y:31   },
+  { n:6,  nome:'Daniela Mercury',      x:34,   y:31   },
+  { n:7,  nome:'Rosely Roth',          x:65,   y:31   },
+  { n:8,  nome:'Cassandra Rios',       x:85,   y:30.5 },
+  { n:9,  nome:'Fátima Bezerra',       x:72,   y:47   },
+  { n:10, nome:'Lacraia',              x:72,   y:62   },
+  { n:11, nome:'Edy Star',             x:87.5, y:57   },
+  { n:12, nome:'Luana Barbosa',        x:10.5, y:75   },
+  { n:13, nome:'Alexandre Ivo Rajão',  x:28,   y:75   },
+  { n:14, nome:'Lucas Fortuna',        x:50,   y:75   },
+  { n:15, nome:'Osvaldo Nunes',        x:68,   y:75   },
+  { n:16, nome:'Clóvis Bornay',        x:87.5, y:75   },
+  { n:17, nome:'Joaozinho Trinta',     x:10.5, y:91   },
+  { n:18, nome:'Joaosinho da Goméia',  x:28,   y:91   },
+  { n:19, nome:'Cláudia Celeste',      x:50,   y:91   },
+  { n:20, nome:'Lorna Washington',     x:72,   y:91   },
+  { n:21, nome:'Geórgia Bengston',     x:10.5, y:52   },
+];
+
+var LOREM = 'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur.';
+
+var world    = document.getElementById('world');
+var img      = document.getElementById('collage-img');
+var stage    = document.getElementById('stage');
+var overlay  = document.getElementById('overlay');
+var panel    = document.getElementById('panel');
+var panelNum = document.getElementById('panel-num');
+var panelNom = document.getElementById('panel-name');
+var panelDes = document.getElementById('panel-desc');
+var btnClose = document.getElementById('btn-close');
+var hint     = document.getElementById('hint');
+var noImgMsg = document.getElementById('no-image-msg');
+
+// Mostrar mensagem se imagem não carregar
+img.addEventListener('error', function () {
+  noImgMsg.style.display = 'flex';
+});
+
+// ── Hotspots ──
+var activeEl = null;
+
+PESSOAS.forEach(function (p) {
+  var el = document.createElement('div');
+  el.className = 'hs';
+  el.textContent = String(p.n).padStart(2, '0');
+  el.style.left = p.x + '%';
+  el.style.top  = p.y + '%';
+  el.setAttribute('title', p.nome);
+  el.addEventListener('pointerdown', function (e) { e.stopPropagation(); });
+  el.addEventListener('click', function (e) {
+    e.stopPropagation();
+    openPanel(p, el);
+  });
+  world.appendChild(el);
+});
+
+// ── Panel ──
+function openPanel(p, el) {
+  if (activeEl) activeEl.classList.remove('is-open');
+  activeEl = el;
+  el.classList.add('is-open');
+  panelNum.textContent = String(p.n).padStart(2, '0');
+  panelNom.textContent = p.nome;
+  panelDes.textContent = LOREM;
+  panel.scrollTop = 0;
+  panel.classList.add('on');
+  overlay.classList.add('on');
+  hint.style.opacity = '0';
+}
+
+function closePanel() {
+  panel.classList.remove('on');
+  overlay.classList.remove('on');
+  if (activeEl) { activeEl.classList.remove('is-open'); activeEl = null; }
+}
+
+btnClose.addEventListener('click', closePanel);
+overlay.addEventListener('click', closePanel);
+document.addEventListener('keydown', function (e) {
+  if (e.key === 'Escape') closePanel();
+});
+
+// ── Sizing ──
+var transX = 0, transY = 0;
+
+function resize() {
+  var vw = innerWidth, vh = innerHeight;
+  var size = vw <= 768
+    ? vw
+    : Math.min(vw * 0.9, vh * 0.96, 840);
+  world.style.width  = size + 'px';
+  world.style.height = size + 'px';
+  transX = 0; transY = 0;
+  applyTransform(0, 0);
+}
+
+window.addEventListener('resize', resize);
+img.addEventListener('load', resize);
+if (img.complete) resize();
+else setTimeout(resize, 100);
+
+// ── Transform ──
+function applyTransform(rx, ry) {
+  var t = 'translate(' + transX + 'px,' + transY + 'px)';
+  if (rx || ry) t += ' perspective(1000px) rotateY(' + rx + 'deg) rotateX(' + ry + 'deg)';
+  world.style.transform = t;
+}
+
+// ── Drag ──
+var MAX = 40;
+var dragging = false;
+var sx, sy, stx, sty, lx, ly, vx, vy, raf;
+
+function clamp(v, a, b) { return v < a ? a : v > b ? b : v; }
+
+function onDown(e) {
+  if (e.target.closest && e.target.closest('.hs')) return;
+  dragging = true;
+  var pt = e.touches ? e.touches[0] : e;
+  sx = pt.clientX; sy = pt.clientY;
+  stx = transX; sty = transY;
+  lx = sx; ly = sy;
+  vx = 0; vy = 0;
+  world.classList.add('dragging');
+  cancelAnimationFrame(raf);
+}
+
+function onMove(e) {
+  if (!dragging) return;
+  var pt = e.touches ? e.touches[0] : e;
+  vx = pt.clientX - lx; vy = pt.clientY - ly;
+  lx = pt.clientX; ly = pt.clientY;
+  transX = clamp(stx + (pt.clientX - sx), -MAX, MAX);
+  transY = clamp(sty + (pt.clientY - sy), -MAX, MAX);
+  applyTransform(0, 0);
+}
+
+function onUp() {
+  if (!dragging) return;
+  dragging = false;
+  world.classList.remove('dragging');
+  (function inertia() {
+    vx *= 0.88; vy *= 0.88;
+    if (Math.abs(vx) < 0.3 && Math.abs(vy) < 0.3) return;
+    transX = clamp(transX + vx, -MAX, MAX);
+    transY = clamp(transY + vy, -MAX, MAX);
+    applyTransform(0, 0);
+    raf = requestAnimationFrame(inertia);
+  })();
+}
+
+world.addEventListener('mousedown',  onDown);
+window.addEventListener('mousemove', onMove);
+window.addEventListener('mouseup',   onUp);
+world.addEventListener('touchstart', onDown, { passive: true });
+window.addEventListener('touchmove', onMove, { passive: true });
+window.addEventListener('touchend',  onUp);
+
+// ── 2.5D (desktop) ──
+if (window.matchMedia('(hover: hover)').matches) {
+  stage.addEventListener('mousemove', function (e) {
+    if (dragging) return;
+    var r = world.getBoundingClientRect();
+    var nx = (e.clientX - r.left  - r.width  / 2) / (r.width  / 2);
+    var ny = (e.clientY - r.top   - r.height / 2) / (r.height / 2);
+    world.style.transition = 'transform 0.25s ease-out';
+    applyTransform(nx * 5, -ny * 4);
+  });
+  stage.addEventListener('mouseleave', function () {
+    world.style.transition = 'transform 0.5s ease-out';
+    applyTransform(0, 0);
+  });
+  world.addEventListener('mousedown', function () {
+    world.style.transition = '';
+  });
+}
+
+// ── Hint ──
+setTimeout(function () { hint.style.opacity = '0'; }, 4500);
+
+})();
+</script>
+</body>
+</html>
