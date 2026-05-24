@@ -97,6 +97,15 @@ html, body {
 .hs:nth-child(3n+2) { animation-delay: -1s; }
 .hs:nth-child(3n)   { animation-delay: -2s; }
 
+@media (max-width: 600px) {
+  .hs {
+    width: 15px;
+    height: 15px;
+    font-size: 6px;
+    border-radius: 3px;
+  }
+}
+
 .hs:hover {
   animation: none;
   background: #da1ed6;
