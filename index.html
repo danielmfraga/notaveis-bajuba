@@ -250,26 +250,33 @@ html, body {
 
 // x, y = canto inferior direito de cada célula (% sobre a imagem)
 var PESSOAS = [
-  { n:1,  nome:'Maria de Kalú',        x:23,   y:21   },
-  { n:2,  nome:'Leci Brandão',         x:48,   y:21   },
-  { n:3,  nome:'Marta (jogadora)',     x:73,   y:21   },
-  { n:4,  nome:'Joanna (cantora)',     x:96,   y:21   },
-  { n:5,  nome:'Roberta Miranda',      x:23,   y:42   },
-  { n:6,  nome:'Daniela Mercury',      x:48,   y:42   },
-  { n:7,  nome:'Rosely Roth',          x:73,   y:42   },
-  { n:8,  nome:'Cassandra Rios',       x:96,   y:42   },
-  { n:9,  nome:'Fátima Bezerra',       x:73,   y:56   },
+  // Linha 1 — 4 colunas iguais, y ~19%
+  { n:1,  nome:'Maria de Kalú',        x:23,   y:19   },
+  { n:2,  nome:'Leci Brandão',         x:48,   y:19   },
+  { n:3,  nome:'Marta (jogadora)',     x:73,   y:19   },
+  { n:4,  nome:'Joanna (cantora)',     x:96,   y:19   },
+  // Linha 2 — 3 colunas, y ~40%
+  { n:5,  nome:'Roberta Miranda',      x:23,   y:40   },
+  { n:6,  nome:'Daniela Mercury',      x:48,   y:40   },
+  { n:7,  nome:'Rosely Roth',          x:73,   y:40   },
+  // Meio direito superior — y ~53%
+  { n:8,  nome:'Cassandra Rios',       x:73,   y:53   },
+  { n:9,  nome:'Fátima Bezerra',       x:96,   y:53   },
+  // Meio direito inferior — y ~65%
   { n:10, nome:'Lacraia',              x:73,   y:65   },
   { n:11, nome:'Edy Star',             x:96,   y:65   },
-  { n:12, nome:'Luana Barbosa',        x:19,   y:82   },
-  { n:13, nome:'Alexandre Ivo Rajão',  x:38,   y:82   },
-  { n:14, nome:'Lucas Fortuna',        x:58,   y:82   },
-  { n:15, nome:'Osvaldo Nunes',        x:77,   y:82   },
-  { n:16, nome:'Clóvis Bornay',        x:96,   y:82   },
-  { n:17, nome:'Joaozinho Trinta',     x:19,   y:98   },
-  { n:18, nome:'Joaosinho da Goméia',  x:38,   y:98   },
-  { n:19, nome:'Cláudia Celeste',      x:58,   y:98   },
-  { n:20, nome:'Lorna Washington',     x:77,   y:98   },
+  // Linha 4 — 4 colunas iguais, y ~82%
+  { n:12, nome:'Luana Barbosa',        x:23,   y:82   },
+  { n:13, nome:'Alexandre Ivo Rajão',  x:48,   y:82   },
+  { n:14, nome:'Lucas Fortuna',        x:73,   y:82   },
+  { n:15, nome:'Osvaldo Nunes',        x:96,   y:82   },
+  // Linha 5 — 5 colunas iguais, y ~97%
+  { n:16, nome:'Clóvis Bornay',        x:18,   y:97   },
+  { n:17, nome:'Joaozinho Trinta',     x:38,   y:97   },
+  { n:18, nome:'Joaosinho da Goméia',  x:58,   y:97   },
+  { n:19, nome:'Cláudia Celeste',      x:77,   y:97   },
+  { n:20, nome:'Lorna Washington',     x:96,   y:97   },
+  // Meio esquerdo — coluna 1, y ~65%
   { n:21, nome:'Geórgia Bengston',     x:23,   y:65   },
 ];
 
