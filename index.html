@@ -487,6 +487,39 @@ html, body {
   font-weight: 700;
 }
 
+/* ── Botão de link especial ── */
+#panel-linkbtn {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  width: 100%;
+  padding: 14px 16px;
+  border-radius: 8px;
+  background: linear-gradient(135deg, rgba(218,30,214,0.15), rgba(124,47,247,0.15));
+  border: 1px solid rgba(218,30,214,0.4);
+  color: #fff;
+  font-family: inherit;
+  font-size: 13.5px;
+  font-weight: 600;
+  line-height: 1.35;
+  text-align: left;
+  cursor: pointer;
+  text-decoration: none;
+  transition: background 0.2s, border-color 0.2s, transform 0.1s;
+  margin-top: 4px;
+}
+#panel-linkbtn:hover {
+  background: linear-gradient(135deg, rgba(218,30,214,0.28), rgba(124,47,247,0.28));
+  border-color: rgba(218,30,214,0.7);
+}
+#panel-linkbtn:active { transform: scale(0.98); }
+#panel-linkbtn .lbtn-arrow {
+  margin-left: auto;
+  font-size: 16px;
+  color: rgba(218,30,214,0.9);
+  flex-shrink: 0;
+}
+
 /* ── Crédito da foto ── */
 .panel-credit {
   margin-top: 6px;
@@ -1206,6 +1239,10 @@ body[data-calibrar="on"] .hs.is-cal-selected {
 
     <div id="panel-desc" class="panel-fade"></div>
 
+    <a id="panel-linkbtn" class="panel-fade" href="#" target="_blank" rel="noopener" style="display:none">
+      <span id="panel-linkbtn-text"></span>
+      <span class="lbtn-arrow">↗</span>
+    </a>
 
     <div class="panel-related panel-fade">
       <div class="panel-related-label">Outros notáveis</div>
@@ -1298,7 +1335,8 @@ body[data-calibrar="on"] .hs.is-cal-selected {
 var PESSOAS = [
   // Linha 1 — 4 colunas
   { n:1,  nome:'Alexandre Ivo',        x:24.3,  y:17.5,  cw:25, ch:17.5, grupo:'r1', foto:'1. Alexandre Ivo.jpg',           ref:'Alexandre Ivo, reprodução: revistamarieclaire.globo.com' },
-  { n:2,  nome:'Cassandra Rios',       x:51.4,  y:17.5,  cw:25, ch:17.5, grupo:'r1', foto:'2. Cassandra Rios.jpg',           ref:'Cassandra Rios, Revista TPM, Repositório: Biblioteca Nacional — Fonte: Museu Bajubá' },
+  { n:2,  nome:'Cassandra Rios',       x:51.4,  y:17.5,  cw:25, ch:17.5, grupo:'r1', foto:'2. Cassandra Rios.jpg',           ref:'Cassandra Rios, Revista TPM, Repositório: Biblioteca Nacional — Fonte: Museu Bajubá',
+    linkUrl:'https://museubajuba.org/cassandra-faz-90-anos/', linkLabel:'Conheça a premiada exposição do Museu Bajubá, Cassandra faz 90 anos' },
   { n:3,  nome:'Cláudia Celeste',      x:75,    y:17.5,  cw:25, ch:17.5, grupo:'r1', foto:'3. Cláudia Celeste.jpg',          ref:'Cláudia Celeste, cenas da novela Olho por Olho — youtube @claudiaceleste1918' },
   { n:4,  nome:'Clóvis Bornay',        x:98.51, y:17.5,  cw:25, ch:17.5, grupo:'r1', foto:'4. Clovis Bornay.jpg',            ref:'Rev. Manchete, 1970 — Acervo Biblioteca Nacional. Fonte: Museu Bajubá' },
   // Linha 2 — 3 colunas (col.4 = foto do olho, sem hotspot)
@@ -1472,6 +1510,17 @@ function openLateral(p, num) {
 
   // outros notáveis do mesmo grupo visual
   buildRelated(p);
+
+  // botão de link especial
+  var linkBtn  = document.getElementById('panel-linkbtn');
+  var linkTxt  = document.getElementById('panel-linkbtn-text');
+  if (p.linkUrl) {
+    linkBtn.href = p.linkUrl;
+    linkTxt.textContent = p.linkLabel || p.linkUrl;
+    linkBtn.style.display = 'flex';
+  } else {
+    linkBtn.style.display = 'none';
+  }
 
   // crédito da foto
   var creditTxt = document.getElementById('panel-credit-text');
